@@ -1,5 +1,5 @@
 # Za razliku od glavnog repoa, ovde se slike i video komituju: public/ je ono što se objavljuje.
-.vercel/
+.wrangler/
 node_modules/
 
 Thumbs.db

@@ -6,9 +6,13 @@ Nastao je od claude.ai artifacta <https://claude.ai/artifact/KQN1oEWsnZbue8ahJUB
 izvor istine je ovaj repo, artifact se više ne ažurira.
 
 ```
-public/      sve što se objavljuje (index.html, styles.css, main.js, img/, media/, robots.txt, sitemap.xml)
-vercel.json  Vercel servira public/ kao statičan sajt, bez instalacije i builda
+public/         sve što se objavljuje (index.html, styles.css, main.js, img/, media/, robots.txt, sitemap.xml)
+wrangler.jsonc  Cloudflare Workers servira public/ kao statičan sajt, bez instalacije i builda
 ```
+
+U footeru su dva claude.ai artifacta, oba podeljena javno („anyone with the link“): Episode guide
+<https://claude.ai/artifact/LVzUMeZakKPLHX2GDDSMkg> i artifact verzija ovog sajta (gore). Ako se
+ijednom ukine javno deljenje, link na sajtu vodi na stranicu za prijavu.
 
 ## Podaci
 
@@ -25,15 +29,16 @@ python -m http.server 8000 -d public
 
 pa <http://localhost:8000>. Direktno otvaranje `index.html` iz Explorera takođe radi.
 
-## Objavljivanje (Vercel)
+## Objavljivanje (Cloudflare)
 
-1. Vercel → Add New → Project → import ovog GitHub repoa. Framework preset: *Other*; ostalo čita iz
-   `vercel.json` (output `public`, bez builda).
-2. Project → Settings → Domains → dodaj `animatedtales.mihailobuilds.com`.
-3. Kod registra domena `mihailobuilds.com`: CNAME zapis `animatedtales` → `cname.vercel-dns.com`
-   (Vercel u koraku 2 pokaže tačnu vrednost). HTTPS sertifikat se pravi sam.
+Repo <https://github.com/stanovljanac/Animated-Tales-Website> je povezan sa Cloudflare Workers
+(Workers Builds). Deploy komanda je podrazumevana `npx wrangler deploy`, build komande nema; sve
+ostalo čita iz `wrangler.jsonc`. Svaki push na `main` je nova produkcija, a rezultat builda se vidi
+i na GitHub-u, kao check na commitu.
 
-Posle toga svaki push na `main` je nova produkcija, a svaki drugi branch dobija preview URL.
+Ako se Worker u dashboardu zove drugačije, `name` u `wrangler.jsonc` mora da se promeni na to ime,
+inače build pada.
+
 Ako sajt ikad ide na drugi hosting: objavljuje se samo sadržaj `public/`.
 
 ## Slike i video
