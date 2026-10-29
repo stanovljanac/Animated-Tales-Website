@@ -1,9 +1,7 @@
-// Cloudflare Workers servira public/ kao statičan sajt, bez instalacije i builda.
-// name mora da bude isto ime koje Worker ima u Cloudflare dashboardu.
+// Cloudflare Pages objavljuje public/ kao statičan sajt, bez instalacije i builda.
+// pages_build_output_dir ima prednost nad Build output directory iz dashboarda.
 {
   "name": "animated-tales-website",
-  "compatibility_date": "2026-10-01",
-  "assets": {
-    "directory": "./public"
-  }
+  "pages_build_output_dir": "./public",
+  "compatibility_date": "2026-10-01"
 }

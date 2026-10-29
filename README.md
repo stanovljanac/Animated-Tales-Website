@@ -7,7 +7,7 @@ izvor istine je ovaj repo, artifact se više ne ažurira.
 
 ```
 public/         sve što se objavljuje (index.html, styles.css, main.js, img/, media/, robots.txt, sitemap.xml)
-wrangler.jsonc  Cloudflare Workers servira public/ kao statičan sajt, bez instalacije i builda
+wrangler.jsonc  Cloudflare Pages objavljuje public/ kao statičan sajt, bez instalacije i builda
 ```
 
 U footeru su dva claude.ai artifacta, oba podeljena javno („anyone with the link“): Episode guide
@@ -29,15 +29,18 @@ python -m http.server 8000 -d public
 
 pa <http://localhost:8000>. Direktno otvaranje `index.html` iz Explorera takođe radi.
 
-## Objavljivanje (Cloudflare)
+## Objavljivanje (Cloudflare Pages)
 
-Repo <https://github.com/stanovljanac/Animated-Tales-Website> je povezan sa Cloudflare Workers
-(Workers Builds). Deploy komanda je podrazumevana `npx wrangler deploy`, build komande nema; sve
-ostalo čita iz `wrangler.jsonc`. Svaki push na `main` je nova produkcija, a rezultat builda se vidi
-i na GitHub-u, kao check na commitu.
+Repo <https://github.com/stanovljanac/Animated-Tales-Website> je povezan sa Cloudflare Pages
+projektom `animated-tales-website`. Build komande nema; `pages_build_output_dir` iz `wrangler.jsonc`
+kaže da se objavljuje `public/`. Bez toga Pages objavi ceo repo i koren sajta vraća 404. Svaki push
+na `main` je nova produkcija (<https://animated-tales-website.pages.dev>), a svaki drugi branch
+dobija preview URL.
 
-Ako se Worker u dashboardu zove drugačije, `name` u `wrangler.jsonc` mora da se promeni na to ime,
-inače build pada.
+Domen: DNS za `mihailobuilds.com` je na GoDaddy-ju (`domaincontrol.com`). Tamo je CNAME zapis
+`animatedtales` → `animated-tales-website.pages.dev`, a u Pages → Custom domains je dodat
+`animatedtales.mihailobuilds.com` (HTTPS pravi Cloudflare). Pages, a ne Worker, zato što Worker
+prima custom domen samo kad je DNS celog domena na Cloudflare-u.
 
 Ako sajt ikad ide na drugi hosting: objavljuje se samo sadržaj `public/`.
 
