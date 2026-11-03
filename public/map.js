@@ -15,9 +15,23 @@
   var mount = document.getElementById("tale-map");
   if (!mount || !D || !WORLD || !AT) return;
 
-  try { init(); } catch (err) {
-    if (window.console) console.error("Story map failed to start", err);
-    fallback();
+  // The map is built when the browser is idle, or at once if the banner is touched first, or a link
+  // names a tale. Until then the page is just the banner, which is what loads first and fastest.
+  var booted = false;
+  function boot() {
+    if (booted) return;
+    booted = true;
+    try { init(); } catch (err) {
+      if (window.console) console.error("Story map failed to start", err);
+      fallback();
+    }
+  }
+  var cover0 = document.getElementById("tm-cover");
+  if (!cover0 || /[?&](tale|era|region)=/.test(location.search)) boot();
+  else {
+    cover0.addEventListener("pointerdown", boot, { once: true });
+    if (window.requestIdleCallback) window.requestIdleCallback(boot, { timeout: 1500 });
+    else setTimeout(boot, 250);
   }
 
   // If anything goes wrong the plate falls back to the channel banner, as before the map existed.
@@ -105,21 +119,12 @@
         '<div class="tm-stage" id="tm-stage">' +
           '<svg class="tm-waves" aria-hidden="true" focusable="false"><defs><pattern id="tm-wave-pat" width="34" height="17" patternUnits="userSpaceOnUse"><path d="M2 6q4-4 8 0t8 0M19 14q4-4 8 0t8 0" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></pattern></defs><rect width="100%" height="100%" fill="url(#tm-wave-pat)"/></svg>' +
           '<svg class="tm-svg" aria-hidden="true" focusable="false" viewBox="0 0 ' + W + " " + H + '" preserveAspectRatio="xMidYMid slice">' +
-            '<defs><path id="tm-land" d="' + WORLD.land + '"/><path id="tm-land-lo" d="' + WORLD.landLo + '"/></defs>' +
-            '<g class="tm-halo"><use href="#tm-land" class="halo h2"/><use href="#tm-land" class="halo h1"/></g>' +
+            '<defs><path id="tm-land" d="' + WORLD.land + '"/></defs>' +
+            '<use href="#tm-land" class="halo"/>' +
             '<use href="#tm-land" class="land"/>' +
             '<g class="tm-grid"></g>' +
             '<g class="tm-worlddeco"></g>' +
           "</svg>" +
-          '<div class="tm-fx hero-fx" aria-hidden="true">' +
-            '<svg class="cloud cloud-a" viewBox="0 0 220 90"><path d="M20 70c-14 0-18-20-2-24 0-16 22-24 34-12 6-22 40-26 50-6 14-16 44-8 44 12 22-4 36 18 22 30z"/></svg>' +
-            '<svg class="cloud cloud-b" viewBox="0 0 220 90"><path d="M24 72c-16-2-14-22 2-24 2-14 22-18 30-8 10-18 38-18 46 0 12-10 34-4 34 12 18 0 26 18 12 20z"/></svg>' +
-            '<div class="gulls">' +
-              '<svg class="gull g1" viewBox="0 0 40 16"><path d="M2 10 Q11 1 20 9 Q29 1 38 10"/></svg>' +
-              '<svg class="gull g2" viewBox="0 0 40 16"><path d="M2 10 Q11 1 20 9 Q29 1 38 10"/></svg>' +
-              '<svg class="gull g3" viewBox="0 0 40 16"><path d="M2 10 Q11 1 20 9 Q29 1 38 10"/></svg>' +
-            "</div>" +
-          "</div>" +
           '<div class="tm-corners" aria-hidden="true"></div>' +
           '<svg class="tm-leaders" aria-hidden="true" focusable="false"></svg>' +
           '<div class="tm-items"></div>' +
@@ -161,7 +166,7 @@
     var foundN = mount.querySelector("#tm-found-n");
     var cornersEl = mount.querySelector(".tm-corners");
     var regionsEl = document.getElementById("tm-regions-chips");
-    var halo1 = svg.querySelector(".halo.h1"), halo2 = svg.querySelector(".halo.h2");
+    var halo = svg.querySelector(".halo");
     var landUse = svg.querySelector(".land");
 
     // ------------------------------------------------- map furniture (static)
@@ -325,24 +330,24 @@
     function isPhone() { return stage.clientWidth < 860; }
     function targetFrame() {
       var s = sizeNow();
-      // With the side panel open, the camera frames the region in what is left of the stage.
-      var padR = (state.tale && !isPhone()) ? panel.offsetWidth + 20 : 0;
+      // The panel lies over the map and never moves the camera (see panelSide).
       var box = state.region === "world" ? WORLD_BOX : RG[state.region].box;
       var air = state.region === "world" ? 1.02 : 1.2;
-      var freeW = s.w - padR;
-      var k = Math.max((box.x1 - box.x0) * air / freeW, (box.y1 - box.y0) * air / s.h);
-      return { cx: (box.x0 + box.x1) / 2 + (padR / 2) * k, cy: (box.y0 + box.y1) / 2, w: s.w * k };
+      var k = Math.max((box.x1 - box.x0) * air / s.w, (box.y1 - box.y0) * air / s.h);
+      return { cx: (box.x0 + box.x1) / 2, cy: (box.y0 + box.y1) / 2, w: s.w * k };
     }
-    // While the camera flies, every frame is drawn again, so the cheap coast stands in for the fine
-    // one (and the halo and graticule are left out in CSS). The fine coast returns on landing.
-    function setFlying(on) {
-      mount.classList.toggle("is-flying", on);
-      landUse.setAttribute("href", on ? "#tm-land-lo" : "#tm-land");
-    }
+    // While the camera flies, the halo and the graticule (the costliest layers to redraw) are left
+    // out in CSS; they fade back in when it lands. The coast itself is never swapped for a cruder one.
+    function setFlying(on) { mount.classList.toggle("is-flying", on); }
+    function near(a, b) { var e = a.w * 0.004; return Math.abs(a.w - b.w) < e && Math.abs(a.cx - b.cx) < e && Math.abs(a.cy - b.cy) < e; }
+    var animTo = null;
     function flyTo(t, instant) {
+      if (!instant && anim && animTo && near(animTo, t)) return; // already on its way there
+      if (!anim && near(cam, t)) { setFlying(false); return; }   // already there: a filter must not move the map
       if (anim) { cancelAnimationFrame(anim); anim = 0; }
       if (instant || reduce) { cam.cx = t.cx; cam.cy = t.cy; cam.w = t.w; setFlying(false); paint(); return; }
       setFlying(true);
+      animTo = t;
       var from = { cx: cam.cx, cy: cam.cy, w: cam.w }, t0 = null, dur = 780;
       function step(now) {
         if (t0 === null) t0 = now;
@@ -352,7 +357,7 @@
         cam.cy = from.cy + (t.cy - from.cy) * e;
         paint();
         if (p < 1) anim = requestAnimationFrame(step);
-        else { anim = 0; setFlying(false); }
+        else { anim = 0; animTo = null; setFlying(false); }
       }
       anim = requestAnimationFrame(step);
     }
@@ -382,8 +387,7 @@
       var ch = cam.w * s.h / s.w, x = cam.cx - cam.w / 2, y = cam.cy - ch / 2, k = cam.w / s.w;
       svg.setAttribute("viewBox", x.toFixed(2) + " " + y.toFixed(2) + " " + cam.w.toFixed(2) + " " + ch.toFixed(2));
       // Strokes keep their pixel width at every zoom (no vector-effect: dash intro needs plain strokes).
-      halo2.setAttribute("stroke-width", (26 * k).toFixed(3));
-      halo1.setAttribute("stroke-width", (11 * k).toFixed(3));
+      halo.setAttribute("stroke-width", (18 * k).toFixed(3));
       landUse.setAttribute("stroke-width", (1.3 * k).toFixed(3));
       grid.style.strokeWidth = (0.8 * k).toFixed(3);
 
@@ -399,14 +403,13 @@
       // World seals are bigger and sit in a crowd (Greece, Italy and the Near East are a few
       // degrees apart), so they are pushed further apart than region pins.
       var world = state.region === "world";
-      var freeW = (state.tale && !isPhone()) ? s.w - (panel.offsetWidth + 20) : s.w;
       var phone = isPhone();
       separate(list, world ? (phone ? 38 : 60) : (phone ? 44 : 40));
       list.forEach(function (it) {
         it.x = Math.max(24, Math.min(s.w - 24, it.x)); it.y = Math.max(24, Math.min(s.h - 24, it.y));
         it.el.style.transform = "translate3d(" + it.x.toFixed(1) + "px," + it.y.toFixed(1) + "px,0)";
         // A pin's name opens to the right, or to the left when the pin is near the free edge.
-        if (it.kind === "tale") it.el.classList.toggle("tag-left", it.x > freeW - 220);
+        if (it.kind === "tale") it.el.classList.toggle("tag-left", it.x > s.w * 0.55);
         var far = Math.hypot(it.x - it.ax, it.y - it.ay) > 8;
         it.leader.line.style.display = it.leader.dot.style.display = far ? "" : "none";
         if (far) {
@@ -528,7 +531,6 @@
       renderPanel();
       flyTo(targetFrame(), opts.instant);
       paint();
-      writeURL();
 
       if (opts.say) announce(opts.say);
     }
@@ -561,11 +563,20 @@
           '<button type="button" class="btn btn-line btn-small" data-act="next"' + (i >= list.length - 1 ? " disabled" : "") + ">Later →</button>" +
         "</nav>";
     }
-    var shownTale = null;
+    // The panel lies over the map, on the side away from the pin, so opening it moves nothing and
+    // never covers the tale it is about. (On a phone it is a bottom sheet, below the stage.)
+    function panelSide() {
+      if (isPhone()) return "r";
+      var s = sizeNow(), t = targetFrame(), ev = EV[state.tale];
+      return (ev.mx - (t.cx - t.w / 2)) / t.w * s.w > s.w / 2 ? "l" : "r";
+    }
     function renderPanel() {
       var open = !!state.tale;
-      panel.classList.toggle("is-open", open);
       if (open) {
+        var side = panelSide(), was = panel.classList.contains("is-open");
+        panel.classList.toggle("side-l", side === "l");
+        if (!was) void panel.offsetWidth; // let the side settle before it slides in
+        panel.classList.add("is-open");
         // Rebuild when the tale or the filter changes the "n of m" line.
         var key = state.tale + "|" + state.era;
         if (panel.getAttribute("data-key") !== key) {
@@ -573,29 +584,17 @@
           panelBody.scrollTop = 0;
           panel.setAttribute("data-key", key);
         }
-      } else { panel.removeAttribute("data-key"); }
-      if (open) panel.removeAttribute("inert"); else panel.setAttribute("inert", "");
-      shownTale = state.tale;
+        panel.removeAttribute("inert");
+      } else {
+        panel.classList.remove("is-open");
+        panel.removeAttribute("data-key");
+        panel.setAttribute("inert", "");
+      }
     }
 
     // ---------------------------------------------------------------- go()
-    var url0 = (function () { try { return new URL(location.href); } catch (e) { return null; } })();
-    function writeURL() {
-      if (!url0) return;
-      try {
-        var u = new URL(location.href), q = u.searchParams;
-        [["era", state.era !== "all" ? state.era : null], ["region", state.region !== "world" ? state.region : null], ["tale", state.tale]].forEach(function (p) {
-          if (p[1]) q.set(p[0], p[1]); else q.delete(p[0]);
-        });
-        history.replaceState(null, "", u.pathname + (q.toString() ? "?" + q.toString() : "") + u.hash);
-      } catch (e) { /* file:// and sandboxed frames refuse; the map still works */ }
-    }
-
-    var wiping = false, queued = null;
     function go(patch, opts) {
       opts = opts || {};
-      // During an age change the last request waits, so a stale one can never overwrite it.
-      if (wiping) { queued = [patch, opts]; return; }
       var next = { era: state.era, region: state.region, tale: state.tale };
       for (var k in patch) next[k] = patch[k];
       if (next.tale && !EV[next.tale]) next.tale = null;
@@ -626,28 +625,23 @@
           if (r.top < 0 || r.top > window.innerHeight * 0.25) mount.scrollIntoView({ behavior: reduce ? "auto" : "smooth", block: "start" });
         }
       }
-      if (eraChanged && !opts.instant && !reduce && wipe.animate) wipeTo(next.era, opts.origin, apply);
-      else apply();
+      if (eraChanged && !opts.instant) ripple(next.era, opts.origin);
+      apply();
     }
 
-    // The age changes under a blot of ink: it spreads from the button that was pressed, the
-    // skin is swapped while the stage is covered, then the blot fades out.
-    var BLOT = { all: "#2b6a60", myth: "#1d2342", ancient: "#7a5a1f", classical: "#8a3f22", medieval: "#6b1620", modern: "#17304f" };
-    function wipeTo(era, origin, apply) {
-      wiping = true;
+    // The map changes skin at once, and a ring in the new age's colour spreads from the button that
+    // was pressed. It only gives feedback: nothing is covered, so the map never looks as if it were
+    // reloading. Only the ring's transform and opacity move, which the compositor does by itself.
+    var RING = { all: "#c9993f", myth: "#4b4f9c", ancient: "#d49a2c", classical: "#b5532f", medieval: "#8e1f2b", modern: "#1f4a7a" };
+    function ripple(era, origin) {
+      if (reduce || !wipe.animate) return;
       var r = stage.getBoundingClientRect();
-      var ox = origin ? origin.x - r.left : r.width / 2, oy = origin ? origin.y - r.top : r.height;
-      wipe.style.background = BLOT[era] || "#1f2430";
-      wipe.style.display = "block";
-      var a = wipe.animate([{ clipPath: "circle(0px at " + ox + "px " + oy + "px)" }, { clipPath: "circle(" + Math.hypot(r.width, r.height) + "px at " + ox + "px " + oy + "px)" }], { duration: 430, easing: "cubic-bezier(.6,0,.3,1)", fill: "forwards" });
-      a.onfinish = function () {
-        apply();
-        var b = wipe.animate([{ opacity: 1 }, { opacity: 0 }], { duration: 520, easing: "ease-out", fill: "forwards" });
-        b.onfinish = function () {
-          a.cancel(); b.cancel(); wipe.style.display = ""; wiping = false;
-          if (queued) { var qd = queued; queued = null; go(qd[0], qd[1]); }
-        };
-      };
+      var ox = origin ? Math.max(0, Math.min(r.width, origin.x - r.left)) : r.width / 2;
+      var oy = origin ? Math.max(0, Math.min(r.height, origin.y - r.top)) : r.height;
+      var rad = Math.hypot(Math.max(ox, r.width - ox), Math.max(oy, r.height - oy)) + 8;
+      wipe.style.cssText = "display:block;box-sizing:border-box;border:7px solid " + (RING[era] || "#c9993f") + ";width:" + 2 * rad + "px;height:" + 2 * rad + "px;left:" + (ox - rad) + "px;top:" + (oy - rad) + "px";
+      var a = wipe.animate([{ transform: "scale(0.02)", opacity: 0.9 }, { transform: "scale(1)", opacity: 0 }], { duration: 700, easing: "cubic-bezier(.2, .6, .3, 1)", fill: "forwards" });
+      a.onfinish = function () { a.cancel(); wipe.style.cssText = ""; };
     }
 
     // ----------------------------------------------------------------- events

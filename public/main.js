@@ -334,7 +334,7 @@
   });
 
   // ---------------------------------------------------------------------------
-  // Motion: ink-draw on scroll and hero parallax. Skipped entirely for
+  // Motion: ink-draw on scroll. Skipped entirely for
   // reduced motion, so every ornament simply stays drawn.
   // ---------------------------------------------------------------------------
   var reduce = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
@@ -365,23 +365,5 @@
         io.observe(s);
       }
     });
-  }
-
-  var stage = document.querySelector("[data-parallax-root]");
-  var layers = stage ? stage.querySelectorAll("[data-depth]") : [];
-  var ticking = false;
-  function parallax() {
-    ticking = false;
-    var rect = stage.getBoundingClientRect();
-    if (rect.bottom < 0) return;
-    var y = Math.max(0, -rect.top);
-    layers.forEach(function (l) {
-      l.style.translate = "0 " + (y * parseFloat(l.getAttribute("data-depth"))).toFixed(1) + "px";
-    });
-  }
-  if (stage) {
-    window.addEventListener("scroll", function () {
-      if (!ticking) { ticking = true; requestAnimationFrame(parallax); }
-    }, { passive: true });
   }
 })();

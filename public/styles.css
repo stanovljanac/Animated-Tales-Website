@@ -156,6 +156,15 @@ p { margin: 0; }
 .nav-links { display: flex; gap: 1.4rem; list-style: none; margin: 0; padding: 0; }
 .nav-links a { color: var(--ink); text-decoration: none; font-family: var(--font-label); font-weight: 500; letter-spacing: 0.05em; }
 .nav-links a:hover { color: var(--verdigris); }
+@media (max-width: 900px) {
+  /* A tablet (768px) had the nav wrapping onto two rows: tighter gaps, 1rem text and a smaller logo. */
+  .nav-inner { gap: 0.75rem; }
+  .brand { gap: 0.45rem; }
+  .brand img { width: 32px; height: 32px; }
+  .brand span { font-size: 1rem; }
+  .nav-links { gap: 0.9rem; }
+  .nav-links a { font-size: 1rem; white-space: nowrap; }
+}
 @media (max-width: 760px) { .nav-links { display: none; } }
 
 /* ---------- Plate frame: double ink rule with gold corner studs, after the banner border ---------- */
@@ -187,34 +196,7 @@ p { margin: 0; }
 .hero { padding-block: clamp(1.5rem, 1rem + 2vw, 2.75rem) clamp(2.5rem, 2rem + 2vw, 3.5rem); }
 .hero-inner { display: grid; gap: clamp(1.5rem, 1rem + 2vw, 2.5rem); }
 .hero-plate { margin: 15px; }
-.hero-stage { position: relative; overflow: hidden; aspect-ratio: 1920 / 1072; max-width: 100%; perspective: 900px; }
-.hero-img { width: 100%; height: 100%; object-fit: cover; transform-origin: 52% 48%; }
-.hero-fx { position: absolute; inset: 0; pointer-events: none; }
-.glow { position: absolute; border-radius: 50%; mix-blend-mode: screen; }
-.glow-storm {
-  left: 62%; top: 4%; width: 30%; height: 46%;
-  background: radial-gradient(closest-side, rgba(255, 236, 170, 0.75), rgba(255, 236, 170, 0) 70%);
-  opacity: 0;
-}
-.glow-sun {
-  left: 2%; top: 8%; width: 26%; height: 40%;
-  background: radial-gradient(closest-side, rgba(255, 220, 140, 0.35), rgba(255, 220, 140, 0) 70%);
-}
-.cloud { position: absolute; fill: rgba(240, 226, 196, 0.5); stroke: rgba(42, 38, 32, 0.6); stroke-width: 2; stroke-linejoin: round; }
-.cloud-a { width: 13%; left: 33%; top: 15%; }
-.cloud-b { width: 10%; left: 50%; top: 5%; }
-.gulls { position: absolute; left: 0; top: 18%; width: 100%; height: 20%; }
-.gull { position: absolute; width: 2.2%; fill: none; stroke: #232020; stroke-width: 2.4; stroke-linecap: round; overflow: visible; }
-.g1 { left: 34%; top: 10%; }
-.g2 { left: 38%; top: 40%; width: 1.7%; }
-.g3 { left: 30.5%; top: 55%; width: 1.4%; }
-.glint {
-  position: absolute; left: var(--x); top: var(--y);
-  width: 1.1%; aspect-ratio: 1;
-  background: #fff6d8;
-  clip-path: polygon(50% 0, 60% 40%, 100% 50%, 60% 60%, 50% 100%, 40% 60%, 0 50%, 40% 40%);
-  opacity: 0;
-}
+.hero-img { display: block; width: 100%; height: auto; }
 .hero-copy { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 1.25rem 2rem; }
 .hero-lead {
   font-family: var(--font-body); font-style: italic; font-weight: 500;
@@ -515,16 +497,6 @@ a.series-item:hover { transform: translateX(4px); box-shadow: -4px 0 0 var(--gol
 
 /* ---------- Motion ---------- */
 @media (prefers-reduced-motion: no-preference) {
-  .hero-img { animation: pushin 26s ease-in-out infinite alternate; }
-  .glow-storm { animation: flash 7.5s linear infinite; }
-  .glow-sun { animation: breathe 9s ease-in-out infinite; }
-  .cloud-a { animation: drift 38s ease-in-out infinite alternate; }
-  .cloud-b { animation: drift 46s ease-in-out infinite alternate-reverse; }
-  .gull { animation: flap 0.9s ease-in-out infinite alternate, glide 14s ease-in-out infinite alternate; transform-origin: 50% 60%; }
-  .g2 { animation-delay: -0.3s, -4s; }
-  .g3 { animation-delay: -0.6s, -8s; }
-  .glint { animation: glint 5s ease-in-out infinite; animation-delay: var(--d); }
-
   .ink .spin-cw { animation: spin var(--t, 40s) linear infinite; transform-box: fill-box; transform-origin: center; }
   .ink .spin-ccw { animation: spin var(--t, 20s) linear infinite reverse; transform-box: fill-box; transform-origin: center; }
   .ink .rock { animation: rock 4.5s ease-in-out infinite alternate; transform-box: fill-box; transform-origin: 50% 80%; }
@@ -534,13 +506,6 @@ a.series-item:hover { transform: translateX(4px); box-shadow: -4px 0 0 var(--gol
   .ink .flicker { animation: flicker 4s steps(1) infinite; }
   .ink .bob { animation: bob 3s ease-in-out infinite alternate; }
 }
-@keyframes pushin { from { transform: scale(1) rotateX(0deg); } to { transform: scale(1.06) rotateX(1.2deg); } }
-@keyframes flash { 0%, 80%, 100% { opacity: 0; } 81% { opacity: 0.9; } 82% { opacity: 0.15; } 84% { opacity: 0.75; } 88% { opacity: 0; } }
-@keyframes breathe { 0%, 100% { opacity: 0.55; } 50% { opacity: 1; } }
-@keyframes drift { from { transform: translateX(-12%); } to { transform: translateX(22%); } }
-@keyframes flap { from { transform: scaleY(1); } to { transform: scaleY(-0.35) translateY(6px); } }
-@keyframes glide { from { translate: 0 0; } to { translate: 220% -60%; } }
-@keyframes glint { 0%, 70%, 100% { opacity: 0; transform: scale(0.4) rotate(0deg); } 80% { opacity: 1; transform: scale(1) rotate(45deg); } }
 @keyframes spin { to { transform: rotate(360deg); } }
 @keyframes rock { from { transform: rotate(-3deg) translateY(0); } to { transform: rotate(3deg) translateY(-2px); } }
 @keyframes waves { from { transform: translateX(-4px); } to { transform: translateX(4px); } }
@@ -623,8 +588,7 @@ a.series-item:hover { transform: translateX(4px); box-shadow: -4px 0 0 var(--gol
 }
 .tm-svg { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
 .tm-svg .halo { fill: var(--m-halo); stroke: var(--m-halo); stroke-linejoin: round; stroke-linecap: round; }
-.tm-svg .halo.h2 { opacity: 0.3; }
-.tm-svg .halo.h1 { opacity: 0.5; }
+.tm-svg .halo { opacity: 0.4; }
 .tm-svg .land { fill: var(--m-land); stroke: var(--m-coast); stroke-linejoin: round; }
 .tm-svg .grid-line { fill: none; stroke: var(--m-line); opacity: var(--m-grid); }
 .tm-svg .land, .tm-svg .halo, .tm-svg .grid-line { transition: opacity 0.9s ease; }
@@ -644,10 +608,7 @@ a.series-item:hover { transform: translateX(4px); box-shadow: -4px 0 0 var(--gol
 .serpent.thin { stroke-width: 1; }
 
 /* Screen-space corner furniture: one group per age. */
-.tm-corners, .tm-fx, .tm-leaders { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; z-index: 2; }
-.tm[data-era="myth"] .tm-fx, .tm[data-era="classical"] .tm-fx { opacity: 0; }
-.tm-fx .cloud-a { left: 5%; top: 38%; }
-.tm-fx .cloud-b { left: 56%; top: 64%; }
+.tm-corners, .tm-leaders { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; z-index: 2; }
 .cn { position: absolute; inset: 0; opacity: 0; transition: opacity 0.6s ease; }
 .tm[data-era="myth"] .cn-myth, .tm[data-era="ancient"] .cn-ancient, .tm[data-era="classical"] .cn-classical,
 .tm[data-era="medieval"] .cn-medieval, .tm[data-era="modern"] .cn-modern { opacity: 1; }
@@ -758,7 +719,8 @@ a.series-item:hover { transform: translateX(4px); box-shadow: -4px 0 0 var(--gol
 .tm-fog-card { display: grid; gap: 0.65rem; justify-items: center; text-align: center; max-width: 34ch; padding: 1rem 1.25rem; }
 .tm-fog-title { font-family: var(--font-display); font-weight: 500; font-size: var(--step-3); line-height: 1.15; }
 .tm-fog-text { font-size: 1.02rem; line-height: 1.45; }
-.tm-wipe { position: absolute; inset: 0; z-index: 8; display: none; pointer-events: none; }
+/* The age-change ring: scaled up from the pressed button. Only transform and opacity move. */
+.tm-wipe { position: absolute; z-index: 8; display: none; pointer-events: none; border-radius: 50%; will-change: transform, opacity; }
 
 /* ---------- Panel: a side scroll on a wide plate, a bottom sheet on a phone ---------- */
 .tm-panel {
@@ -769,6 +731,9 @@ a.series-item:hover { transform: translateX(4px); box-shadow: -4px 0 0 var(--gol
   transition: transform 0.4s cubic-bezier(.3, .9, .3, 1), opacity 0.3s ease, visibility 0s 0.4s;
 }
 .tm-panel.is-open { transform: none; opacity: 1; visibility: visible; transition-delay: 0s; }
+/* map.js puts the panel on the side away from the pin, so it never covers it and never moves the map. */
+.tm-panel.side-l { right: auto; left: 12px; transform: translateX(calc(-100% - 28px)); }
+.tm-panel.side-l.is-open { transform: none; }
 .tm-panel-body { flex: 1; overflow-y: auto; overscroll-behavior: contain; padding: 1.1rem 1.1rem 0; }
 .tm-close {
   position: absolute; top: 8px; right: 8px; z-index: 2; width: 34px; height: 34px; display: grid; place-items: center; padding: 0;
@@ -902,19 +867,19 @@ a.series-item:hover { transform: translateX(4px); box-shadow: -4px 0 0 var(--gol
 .js .tm-cover-tab svg { width: 1.25em; height: 1.25em; }
 .tm.is-opening .tm-cover-tab { opacity: 0; transition: opacity 0.25s ease; }
 
-/* Hint: every few seconds the banner lifts 15 to 18% of its height from the bottom, settles
+/* Hint: every few seconds the banner lifts about 28% of its height from the bottom, settles
    back, and lifts again, showing the map under it. Only the cover's transform moves, so it runs
    on the compositor. */
 @media (prefers-reduced-motion: no-preference) {
   .tm-cover.is-hint { animation: tm-peek 5.2s cubic-bezier(.45, .05, .25, 1) 1.2s infinite; }
   .tm-cover.is-hint .tm-cover-tab svg { animation: tm-nudge 5.2s ease-in-out 1.2s infinite; }
-  .tm-cover.is-hint:hover { animation: none; transform: translateY(-6%); transition: transform 0.25s ease; }
+  .tm-cover.is-hint:hover { animation: none; transform: translateY(-9%); transition: transform 0.25s ease; }
 }
 @keyframes tm-peek {
   0%, 56%, 100% { transform: translateY(0); }
-  67% { transform: translateY(-18%); }
-  74% { transform: translateY(-15.5%); }
-  81% { transform: translateY(-18%); }
+  67% { transform: translateY(-28%); }
+  74% { transform: translateY(-25.5%); }
+  81% { transform: translateY(-28%); }
   93% { transform: translateY(0); }
 }
 @keyframes tm-nudge { 0%, 56%, 100% { transform: translateY(0); } 67%, 81% { transform: translateY(-3px); } 74% { transform: translateY(1px); } }
@@ -932,7 +897,6 @@ a.series-item:hover { transform: translateX(4px); box-shadow: -4px 0 0 var(--gol
 @media (max-width: 700px) {
   .hero-plate { margin: 10px; }
 }
-.tm.is-phone .tm-fx { display: none; }
 .tm.is-phone .tm-waves { animation: none; }
 .tm.is-phone .starfield i:nth-child(n+16) { display: none; }
 .tm.is-phone .tm-pin.is-current .tm-medal { animation: none; }

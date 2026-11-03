@@ -9,7 +9,6 @@
 //   AT_GEO_DEPS=/tmp/geo node tools/make-world.mjs
 //
 // Izlaz je običan <script> (window.AT_WORLD), a ne .svg + fetch, da `file://` pregled radi.
-// Izlaz ima dve putanje obale: `land` (fina) i `landLo` (gruba, za vreme leta kamere).
 // Geometrija je Natural Earth (land-10m), projekcija Natural Earth 1 rotirana tako da je
 // centar mape na 50°E: Mediteran je levo od sredine, a ceo Pacifik (Fidži, Tonga, Tahiti,
 // Havaji) ostaje u komadu na desnoj strani. Antarktik je odsečen.
@@ -46,16 +45,14 @@ const BLEED = 15;             // kopno se seče 15 jedinica izvan okvira, da se 
 // efektivno manji u zoni. Prvi pogodak pobeđuje, pa idu od najfinijih ka grubljim.
 const ZONES = [
   { box: [18, 33, 30, 42.5], m: 700, name: 'aegean' },
-  { box: [164, -32, 180, -4], m: 700, name: 'pacific-west' },
-  { box: [-180, -32, -138, -4], m: 700, name: 'pacific-east' },
-  { box: [-12, 26, 52, 73], m: 36, name: 'europe-near-east' },
-  { box: [55, 30, 90, 52], m: 6, name: 'central-asia' },
+  { box: [160, -40, 180, 6], m: 100, name: 'pacific-west' },
+  { box: [-180, -40, -128, 6], m: 100, name: 'pacific-east' },
+  { box: [-12, 26, 52, 73], m: 45, name: 'europe-near-east' },
+  { box: [44, 8, 130, 54], m: 6, name: 'asia' },
 ];
 const BASE_THRESHOLD = 0.24;  // deg² u grubim zonama (~0.4° detalj)
 const MIN_AREA_COARSE = 0.5;  // jedinice² ispod kojih se ostrvce u grubim zonama izbacuje
 const MIN_AREA_FINE = 0.012;
-const LO_THRESHOLD = 1.6;     // deg² za grubu obalu (~1.3° detalj)
-const LO_MIN_AREA = 3;
 
 // ---- učitavanje i pojednostavljenje --------------------------------------
 const topo = JSON.parse(fs.readFileSync(path.join(DEPS, 'node_modules/world-atlas/land-10m.json'), 'utf8'));
@@ -120,15 +117,6 @@ const hi = toPath(land, MIN_AREA_COARSE, MIN_AREA_FINE, true);
 const d = hi.d;
 const polys = { length: hi.count };
 
-// Gruba obala: koristi se samo dok kamera leti, kad se svaki frejm iscrtava iznova. Bez zona,
-// pa ima nekoliko hiljada tačaka manje; kad kamera sleti, vraća se fina.
-const planarWeight = (t) => {
-  const [a, b, c] = t;
-  return Math.abs((a[0] - c[0]) * (b[1] - a[1]) - (a[0] - b[0]) * (c[1] - a[1])) / 2;
-};
-const landLo = asMulti(feature(simplify(presimplify(topo, planarWeight), LO_THRESHOLD), topo.objects.land));
-const lo = toPath(landLo, LO_MIN_AREA, LO_MIN_AREA, false);
-
 // ---- provera: projekcija koja se isporučuje == d3 ----------------------------
 const fn = `function (lon, lat) {
     var l = lon + (${ROT});
@@ -182,10 +170,8 @@ window.AT_WORLD = {
   h: ${H.toFixed(2)},
   // lon/lat -> koordinate mape; ista formula kao d3.geoNaturalEarth1().rotate([${ROT}, 0])
   project: ${fn},
-  land: "${d}",
-  // grublja obala, samo dok kamera leti
-  landLo: "${lo.d}"
+  land: "${d}"
 };
 `;
 fs.writeFileSync(path.join(PUBLIC, 'map-world.js'), out);
-console.log(`map-world.js: ${(out.length / 1024).toFixed(1)} KB (fina ${(d.length / 1024).toFixed(1)}, gruba ${(lo.d.length / 1024).toFixed(1)}), ${hi.count} poligona, ${W}x${H.toFixed(1)} (odnos ${(W / H).toFixed(2)})`);
+console.log(`map-world.js: ${(out.length / 1024).toFixed(1)} KB ${hi.count} poligona, ${W}x${H.toFixed(1)} (odnos ${(W / H).toFixed(2)})`);

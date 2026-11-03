@@ -33,12 +33,19 @@ Tek tada se pod ploču dodaje red regija i dugme „Random tale”. Svet se
 vidi kao po jedan pečat po regiji sa brojem priča; klik leti kamerom u regiju, gde je svaka priča
 poseban pin. Traka doba (Myth & Legend, Ancient World, Classical Antiquity, Middle Ages, Modern Era)
 boji pinove i menja izgled mape; pin otvara svitak sa videima, Shorts i oznakom vrste tvrdnje
-(record, tradition, debate). Stanje je u URL-u: `?era=classical&region=greece&tale=marathon`
-otvara taj pin direktno, pa link u opisu videa može da vodi na mapu.
+(record, tradition, debate). Link `?era=classical&region=greece&tale=marathon` otvara taj pin
+direktno (preskače baner), pa link u opisu videa može da vodi na mapu. Mapa sama ne upisuje stanje
+u URL, pa refresh uvek vraća baner.
 
-Kod: `map.js` (baner, crtanje, kamera, pinovi, filteri, svitak), `map-world.js` (generisano: putanje
+Kod: `map.js` (baner, crtanje, kamera, pinovi, filteri, svitak; gradi se kad je pregledač slobodan ili čim se baner dodirne), `map-world.js` (generisano: putanje
 kopna i projekcija), CSS u sekciji `Story map` u `styles.css`. Bez JavaScript-a ploča prikazuje
 baner kanala; ako `map.js` pukne, vraća se baner.
+
+**Pravilo: jedan video, jedan pin.** Pin je ono o čemu je video, i video se nikad ne pojavljuje na
+mapi dvaput. Jedan pin sme da drži više videa (Greek Gods ima dva dela). Ako se u videu pominje drugo
+mesto, to ide u tekst pina, ne u novi pin. Panel se otvara preko mape, sa strane suprotne od pina, i
+ne pomera kameru. Promena doba menja izgled odmah, uz prsten boje doba; mapa se ne preleće i ne
+prekriva.
 
 **Dodavanje pina.** U `data.js`, u `EVENTS`, jedan unos:
 
@@ -49,7 +56,8 @@ baner kanala; ako `map.js` pukne, vraća se baner.
 ```
 
 - Doba se računa iz `year` (negativno = p.n.e.), nikad se ne upisuje. Bez datuma: `myth: true`
-  umesto `year`. `circa: true` piše „c.”; `when` zamenjuje ceo ispis datuma.
+  umesto `year`. `circa: true` piše „c.”; `when` zamenjuje ceo ispis datuma. Samo kad priča nema
+  jedan datum a poznato je njeno doba, `era` ga zadaje izričito (Polinezija je za sada tako).
 - `region` je jedna od `REGIONS` (nova regija = jedan unos sa `fit` okvirom i pozicijom pečata).
 - Jedan video može imati više pinova (Antikitera ima olupinu i otkriće), a jedan pin više videa.
 - `claim` se odnosi na tekst pina, ne na ceo video.
@@ -58,9 +66,9 @@ baner kanala; ako `map.js` pukne, vraća se baner.
 
 **Geometrija.** `map-world.js` je generisan i ne menja se rukom. Natural Earth kopno,
 projekcija Natural Earth 1 rotirana na 50°E (Mediteran levo od sredine, ceo Pacifik u komadu na
-desnoj strani), fin detalj samo u Egeju i na ostrvima Pacifika. Generator pravi i grubu obalu
-(`landLo`, ~12 KB) koja se crta samo dok kamera leti, da letenje ne iscrtava 120 KB putanje na
-svakom frejmu. Zavisnosti se instaliraju van repoa:
+desnoj strani), fin detalj samo u Egeju i na ostrvima Pacifika. Okviri regija i zone detalja
+(`ZONES` u generatoru) moraju da se poklapaju: nova regija sa većim okvirom traži i finiju obalu tamo,
+inače se na zumu vide grubi poligoni. Zavisnosti se instaliraju van repoa:
 
 ```
 mkdir /tmp/geo && cd /tmp/geo && npm init -y

@@ -83,8 +83,8 @@
   ];
 
   // ---------------------------------------------------------------------------
-  // Story map. A pin is an EVENT, not a video: one episode can have several pins
-  // (Antikythera has the wreck and the find), and one pin can hold several videos.
+  // Story map. One video, one pin: the pin marks what the video is MAINLY about, and a video is
+  // never on the map twice. One pin can hold several videos (Greek Gods has two parts).
   //
   // To add a tale: add the episode above, then one entry in EVENTS (or add the video ID to an
   // existing event). The era is computed from `year`, so it is never typed by hand; the region
@@ -95,6 +95,7 @@
   //   claim  "record" | "tradition" | "debate", the same three kinds as the "How it's made"
   //          section. Pick what the PIN's text claims, not the whole episode.
   //   lat/lon  Real place where there is one. For myth, the region the story is set in.
+  //   era    Only when the story has no single date but you know its age: it overrides `year`.
   // ---------------------------------------------------------------------------
 
   // Order is the order of the era bar. "all" is not an era, only the unfiltered state. The
@@ -109,6 +110,7 @@
   ];
 
   function eraOf(ev) {
+    if (ev.era) return ev.era;
     if (ev.myth) return "myth";
     if (ev.year < -800) return "ancient";
     if (ev.year < 476) return "classical";
@@ -124,7 +126,9 @@
   }
 
   // `chip` names the region on the buttons below the map and `short` (optional) on its seal.
-  // `fit` is [lonW, latS, lonE, latN]: the camera frames this box. `seal` is where the region's
+  // `fit` is [lonW, latS, lonE, latN]: the camera frames this box. Keep it wide rather than tall (the
+  // stage is 2.3:1, so a tall box shows far more than it names), and east of 130°W: the map is cut
+  // there, and a box that crosses the cut wraps to the other side of the world. `seal` is where the region's
   // seal sits on the world view. Regions are places, not civilisations, so "Classical Antiquity"
   // and "Italy" never contradict each other.
   var REGIONS = [
@@ -132,17 +136,17 @@
     { id: "italy",     name: "Italy",                chip: "Italy",            fit: [6.5, 36.3, 19.0, 47.3],    seal: [12.6, 42.8] },
     { id: "near-east", name: "Egypt & the Near East", chip: "Egypt & Near East", short: "Near East", fit: [23.0, 21.5, 41.5, 41.5], seal: [34.5, 30.6] },
     { id: "north",     name: "The North",            chip: "The North",        fit: [2.0, 55.5, 19.0, 67.5],    seal: [9.5, 62.0] },
-    { id: "asia",      name: "Central & East Asia",  chip: "Asia",             fit: [60.0, 30.0, 112.0, 48.0],  seal: [72.0, 41.0] },
-    { id: "pacific",   name: "The Pacific",          chip: "Pacific",          fit: [166.0, -26.0, -138.0, -8.0], seal: [-176.0, -17.5] }
+    { id: "asia",      name: "Central & East Asia",  chip: "Asia",             fit: [44.0, 10.0, 126.0, 52.0],  seal: [72.0, 41.0] },
+    { id: "pacific",   name: "The Pacific",          chip: "Pacific",          fit: [164.0, -33.0, -133.0, -1.0], seal: [-166.0, -15.0] }
   ];
 
   var EVENTS = [
-    { id: "olympus", name: "Three brothers draw lots", place: "Mount Olympus, in Greek myth",
+    { id: "greek-gods", name: "Greek Gods", place: "Mount Olympus, in Greek myth",
       lat: 40.09, lon: 22.36, myth: true, region: "greece", claim: "tradition",
-      text: "Three brothers draw lots for the sky, the sea and the underworld, and their sisters are left with marriage, the harvest and the hearth. The Greek Gods series follows the Olympian family one generation at a time.",
+      text: "Three brothers draw lots for the sky, the sea and the underworld, and their sisters are left with marriage, the harvest and the hearth. The series follows the Olympian family one generation at a time.",
       videos: ["aE1EFPZLo3E", "asH-WNx94kA"], shorts: ["ya6UUlhU648", "cU085EwoFs8", "IGr4Zwxyetk", "VIWp3jvBtwo"] },
 
-    { id: "fenrir", name: "The binding of Fenrir", place: "Scandinavia, in Norse myth",
+    { id: "tyr-and-fenrir", name: "Týr and Fenrir", place: "Scandinavia, in Norse myth",
       lat: 61.6, lon: 8.3, myth: true, region: "north", claim: "tradition",
       text: "The gods fear the wolf Fenrir and try to bind him. Two chains break. The third, Gleipnir, is a ribbon made of six impossible things, and Fenrir will only let it be put on if one of the gods puts a hand in his mouth. Týr does.",
       videos: ["MZ5I5s2hapA"], shorts: ["BSsP9n2tbSc"] },
@@ -152,19 +156,16 @@
       text: "A plot against the pharaoh grew inside his own palace around 1155 BC. We know it from the trial records on papyrus, which name the accused.",
       videos: ["DBGWroAot-4"], shorts: ["2vnd3hiaP2U"] },
 
-    { id: "lapita", name: "Voyagers cross to Fiji, Tonga and Samoa", place: "Fiji, Tonga and Samoa",
-      lat: -17.8, lon: 178.0, year: -900, circa: true, region: "pacific", claim: "record",
-      text: "Around 3,000 years ago, voyagers in canoes crossed open water to Fiji, Tonga and Samoa, the first step into the remote Pacific. They found islands by reading the stars, the swells, the birds and the clouds.",
+    // Polynesia has no single place or date in the video, so none is claimed. The pin sits at the
+    // Society Islands, in the heart of Polynesia; `era` is a placeholder until the period is chosen.
+    { id: "polynesia", name: "Polynesian wayfinding", place: "Polynesia (pinned at the Society Islands)",
+      lat: -17.65, lon: -149.45, era: "ancient", when: "Over many centuries", region: "pacific", claim: "tradition",
+      text: "Polynesian navigators crossed enormous stretches of the Pacific without instruments. They found islands by reading the stars, the swells, the winds, the birds and the clouds, and accumulated knowledge made voyages that seem impossible possible.",
       videos: ["Mrai30wItZI"], shorts: [] },
 
-    { id: "delphi", name: "The oracle's answer", place: "Delphi, Greece",
-      lat: 38.48, lon: 22.5, year: -547, circa: true, region: "greece", claim: "tradition",
-      text: "Croesus of Lydia asked the oracle at Delphi whether he should attack Persia. He was told a great empire would fall, and he took it as good news. The story comes to us from Herodotus.",
-      videos: ["hsGI3xlJ-SY"], shorts: [] },
-
     { id: "sardis", name: "The fall of Sardis", place: "Sardis, Lydia (modern Turkey)",
-      lat: 38.49, lon: 28.04, year: -546, circa: true, region: "near-east", claim: "record",
-      text: "Cyrus of Persia defeated Croesus and took Sardis, the Lydian capital, around 546 BC. The story of the oracle that led Croesus to war is told by Herodotus.",
+      lat: 38.49, lon: 28.04, year: -546, circa: true, region: "near-east", claim: "tradition",
+      text: "Croesus, the last king of Lydia, asked the oracle at Delphi whether to attack Persia and was told a great empire would fall. It was his own: Cyrus of Persia took Sardis around 546 BC. The oracle story comes to us from Herodotus.",
       videos: ["hsGI3xlJ-SY"], shorts: [] },
 
     { id: "marathon", name: "The Battle of Marathon", place: "The plain of Marathon, Greece",
@@ -182,20 +183,10 @@
       text: "Dayuan would not sell its horses, so the Han emperor sent an army. It came back beaten, and he would not let it back through the Jade Gate.",
       videos: ["NHMGOOVNNk0"], shorts: ["hAbpc4Q_14Q", "u9WZwX3Iktw"] },
 
-    { id: "antikythera-wreck", name: "The Antikythera shipwreck", place: "Off the island of Antikythera",
-      lat: 35.88, lon: 23.31, year: -65, circa: true, region: "greece", claim: "record",
-      text: "A cargo ship carrying bronze and marble statues, glass and fine pottery sank off the island of Antikythera around 65 BC. It lay on the seabed for nearly 2,000 years.",
-      videos: ["_eKElXW9Hk4"], shorts: ["Ci5iIipPjEk"] },
-
-    { id: "east-polynesia", name: "Settling the eastern Pacific", place: "The Society Islands, French Polynesia",
-      lat: -16.83, lon: -151.36, year: 1100, when: "c. AD 1000 to 1250", region: "pacific", claim: "debate",
-      text: "After about AD 1000, canoes reached the Society Islands, then Hawaii, Rapa Nui and Aotearoa New Zealand. Exactly when each landfall happened is still debated.",
-      videos: ["Mrai30wItZI"], shorts: [] },
-
-    { id: "antikythera-find", name: "The gear wheel in the lump of bronze", place: "National Archaeological Museum, Athens",
-      lat: 37.99, lon: 23.73, year: 1902, when: "1900 to 1902", region: "greece", claim: "record",
-      text: "In 1900 sponge divers sheltering from a storm found the wreck. Two years later, in Athens, a lump of corroded bronze split open and the archaeologist Valerios Stais saw a gear wheel. The Antikythera mechanism tracked the Sun and the Moon and predicted eclipses.",
-      videos: ["_eKElXW9Hk4"], shorts: [] }
+    { id: "antikythera", name: "The Antikythera mechanism", place: "Off the island of Antikythera, Greece",
+      lat: 35.88, lon: 23.31, year: -146, when: "Built c. 205 to 87 BC", region: "greece", claim: "record",
+      text: "In 1900 sponge divers sheltering from a storm found an ancient shipwreck off Antikythera. Two years later a lump of corroded bronze split open and the archaeologist Valerios Stais saw a gear wheel. The mechanism tracked the Sun and the Moon and predicted eclipses.",
+      videos: ["_eKElXW9Hk4"], shorts: ["Ci5iIipPjEk"] }
   ];
 
   // The three kinds of claim, worded as in the "How it's made" section.
