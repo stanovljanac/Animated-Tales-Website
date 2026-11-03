@@ -578,7 +578,9 @@ a.series-item:hover { transform: translateX(4px); box-shadow: -4px 0 0 var(--gol
 /* The hero grid must not grow with the era bar's scrolling content: a column of plain `auto`
    takes the widest min-content, which would push the plate wider than a phone. */
 .hero-inner { grid-template-columns: minmax(0, 1fr); }
-.js #tale-map:empty { aspect-ratio: 1000 / 431.7; } /* hold the space until map.js has built the map */
+/* Hold roughly the final height until map.js has built the map, so nothing below jumps. */
+.js .tm:not(.is-built) { aspect-ratio: 1000 / 481; }
+@media (max-width: 700px) { .js .tm:not(.is-built) { aspect-ratio: 1.2; } }
 .tm-fallback .hero-img { width: 100%; height: auto; }
 .tm { position: relative; background: var(--surface); }
 .tm-stagewrap { position: relative; overflow: hidden; }
@@ -595,7 +597,8 @@ a.series-item:hover { transform: translateX(4px); box-shadow: -4px 0 0 var(--gol
   background: var(--m-sea);
   transition: background-color 0.01s;
 }
-.tm.is-phone .tm-stage { aspect-ratio: 4 / 3; }
+/* On a phone the whole world fits by width, so the stage is 3:2: the spare bands above and below hold the counter and the name. */
+.tm.is-phone .tm-stage { aspect-ratio: 3 / 2; }
 /* Myth: the night map. Dark blue paper, gold coast, constellations over the sea. */
 .tm[data-era="myth"] .tm-stage { --m-sea: #1b2142; --m-land: #2b3466; --m-coast: #e0b862; --m-line: #e0b862; --m-halo: #3a4a8f; --m-wave: rgba(224, 184, 98, 0.16); --m-grid: 0; --m-fog: 27, 33, 66; --m-fogtext: #f3ead5; }
 /* Ancient World: papyrus. Warm sand, turquoise sea, reed fibres over everything. */
@@ -612,11 +615,11 @@ a.series-item:hover { transform: translateX(4px); box-shadow: -4px 0 0 var(--gol
 .tm-stage .ink .f-bg { fill: var(--m-land); }
 
 /* The sea is a CSS layer so the only thing that moves all the time is cheap to repaint. */
+/* Waves: an inline svg with a repeating pattern, drawn once into its own layer and then only
+   shifted. (A CSS mask here forced an extra render surface on every frame.) */
 .tm-waves {
-  position: absolute; inset: -34px -34px -34px -68px; pointer-events: none; will-change: transform;
-  background: var(--m-wave);
-  -webkit-mask: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='34' height='17' viewBox='0 0 34 17'><path d='M2 6q4-4 8 0t8 0M19 14q4-4 8 0t8 0' fill='none' stroke='black' stroke-width='1.3' stroke-linecap='round'/></svg>") repeat 0 0 / 34px 17px;
-          mask: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='34' height='17' viewBox='0 0 34 17'><path d='M2 6q4-4 8 0t8 0M19 14q4-4 8 0t8 0' fill='none' stroke='black' stroke-width='1.3' stroke-linecap='round'/></svg>") repeat 0 0 / 34px 17px;
+  position: absolute; inset: -34px -34px -34px -68px; width: calc(100% + 102px); height: calc(100% + 68px);
+  pointer-events: none; will-change: transform; color: var(--m-wave);
 }
 .tm-svg { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
 .tm-svg .halo { fill: var(--m-halo); stroke: var(--m-halo); stroke-linejoin: round; stroke-linecap: round; }
@@ -628,13 +631,6 @@ a.series-item:hover { transform: translateX(4px); box-shadow: -4px 0 0 var(--gol
 /* While the camera flies, the halo strokes and the graticule (the costliest layers to repaint)
    are left out; they fade back in when it lands. */
 .tm.is-flying .tm-svg .halo, .tm.is-flying .tm-svg .grid-line { opacity: 0; visibility: hidden; transition: none; }
-
-/* Ink-in intro: the coast is drawn first, then the land and the pins fade in. */
-.tm-svg .intro { fill: none; stroke: var(--m-coast); stroke-linejoin: round; stroke-dasharray: 1 1; stroke-dashoffset: 1; animation: tm-draw 2.5s cubic-bezier(.5, 0, .3, 1) forwards; }
-.tm.is-intro .tm-svg .land, .tm.is-intro .tm-svg .halo, .tm.is-intro .tm-svg .grid-line,
-.tm.is-intro .tm-items, .tm.is-intro .tm-hud, .tm.is-intro .tm-cartouche { opacity: 0; }
-.tm-items, .tm-hud, .tm-cartouche { transition: opacity 0.9s ease; }
-@keyframes tm-draw { to { stroke-dashoffset: 0; } }
 
 /* World-space decoration: only on the world view, where its size makes sense. */
 .wd { opacity: 0; transition: opacity 0.6s ease; }
@@ -738,9 +734,6 @@ a.series-item:hover { transform: translateX(4px); box-shadow: -4px 0 0 var(--gol
 }
 .tm-found b { font-family: var(--font-body); }
 .all-found .tm-found { background: #c9993f; }
-.tm-random { background: #f6efdc; color: #1f2430; border-color: #1f2430; box-shadow: 2px 2px 0 rgba(0, 0, 0, 0.35); }
-.tm-random svg { width: 1.15em; height: 1.15em; }
-.tm.is-phone .tm-found-label { display: none; }
 
 .tm-cartouche {
   position: absolute; z-index: 4; left: 50%; bottom: 12px; transform: translateX(-50%);
@@ -868,10 +861,8 @@ a.series-item:hover { transform: translateX(4px); box-shadow: -4px 0 0 var(--gol
 .tm-pin.is-current .tm-medal { transform: scale(1.18); }
 
 /* ---------- Phone refinements (come last so they win over the base rules above) ---------- */
-.tm.is-phone .tm-hud { left: auto; right: 8px; top: 8px; gap: 0.35rem; }
+.tm.is-phone .tm-hud { left: 8px; top: 8px; }
 .tm.is-phone .tm-found { font-size: 0.85rem; padding: 0.08rem 0.5rem; }
-.tm.is-phone .tm-random { padding: 0.3rem 0.45rem; }
-.tm.is-phone .tm-random-label { display: none; }
 .tm.is-phone .tm-cartouche { left: 8px; bottom: 8px; transform: none; padding: 0.22rem 0.65rem; }
 .tm.is-phone .tm-cartouche b { font-size: 0.8rem; letter-spacing: 0.06em; white-space: nowrap; }
 .tm.is-phone .tm-pin .tm-tag { display: none; }
@@ -885,3 +876,68 @@ a.series-item:hover { transform: translateX(4px); box-shadow: -4px 0 0 var(--gol
 .tm.is-phone .tm-medal svg { width: 18px; height: 18px; }
 
 .tm-video .btn { white-space: nowrap; padding: 0.32rem 0.7rem; font-size: 0.9rem; }
+
+/* =====================================================================================
+   Banner cover: the plate opens as the channel banner and rolls up to show the map.
+   ===================================================================================== */
+.tm-cover { position: relative; display: block; overflow: hidden; }
+.tm-cover-img { display: block; width: 100%; height: auto; }
+.tm-cover-tab { display: none; }
+.js .tm { overflow: hidden; }
+.js .tm-cover {
+  position: absolute; inset: 0; z-index: 20; cursor: pointer; background: #e8dcc0;
+  will-change: transform; -webkit-tap-highlight-color: transparent;
+}
+.js .tm-cover-img { height: 100%; object-fit: cover; }
+.js .tm-cover:focus-visible { outline: 3px solid var(--verdigris); outline-offset: -6px; }
+
+/* The pull tab, on the bottom edge: it rides up with the cover, like the cord of a blind. */
+.js .tm-cover-tab {
+  display: inline-flex; align-items: center; gap: 0.5rem;
+  position: absolute; left: 50%; bottom: clamp(12px, 3.5%, 24px); transform: translateX(-50%);
+  padding: 0.5rem 1.1rem 0.5rem 0.8rem; white-space: nowrap;
+  background: #f6efdc; color: #1f2430; border: 2px solid #1f2430; box-shadow: 3px 3px 0 rgba(0, 0, 0, 0.4);
+  font-family: var(--font-label); font-weight: 700; font-size: 1.05rem; letter-spacing: 0.05em;
+}
+.js .tm-cover-tab svg { width: 1.25em; height: 1.25em; }
+.tm.is-opening .tm-cover-tab { opacity: 0; transition: opacity 0.25s ease; }
+
+/* Hint: every few seconds the banner lifts 15 to 18% of its height from the bottom, settles
+   back, and lifts again, showing the map under it. Only the cover's transform moves, so it runs
+   on the compositor. */
+@media (prefers-reduced-motion: no-preference) {
+  .tm-cover.is-hint { animation: tm-peek 5.2s cubic-bezier(.45, .05, .25, 1) 1.2s infinite; }
+  .tm-cover.is-hint .tm-cover-tab svg { animation: tm-nudge 5.2s ease-in-out 1.2s infinite; }
+  .tm-cover.is-hint:hover { animation: none; transform: translateY(-6%); transition: transform 0.25s ease; }
+}
+@keyframes tm-peek {
+  0%, 56%, 100% { transform: translateY(0); }
+  67% { transform: translateY(-18%); }
+  74% { transform: translateY(-15.5%); }
+  81% { transform: translateY(-18%); }
+  93% { transform: translateY(0); }
+}
+@keyframes tm-nudge { 0%, 56%, 100% { transform: translateY(0); } 67%, 81% { transform: translateY(-3px); } 74% { transform: translateY(1px); } }
+
+/* Never-ending animations stop while the plate is off screen. */
+.tm.is-offscreen, .tm.is-offscreen * { animation-play-state: paused !important; }
+
+/* The region row and the "Random tale" button sit under the plate, and appear once it is open. */
+.tm-regions.tm-rise { animation: rise 0.6s ease both; }
+.chip.tm-random { gap: 0.45rem; border-style: dashed; background: transparent; }
+.chip.tm-random:hover { background: var(--bg); }
+.chip.tm-random svg { width: 1.1em; height: 1.1em; }
+
+/* ---------- Phone: lighter, and the whole world in view ---------- */
+@media (max-width: 700px) {
+  .hero-plate { margin: 10px; }
+}
+.tm.is-phone .tm-fx { display: none; }
+.tm.is-phone .tm-waves { animation: none; }
+.tm.is-phone .starfield i:nth-child(n+16) { display: none; }
+.tm.is-phone .tm-pin.is-current .tm-medal { animation: none; }
+.tm.is-phone .tm-found { font-size: 0.82rem; }
+.tm.is-phone .tm-cover-tab { font-size: 0.95rem; padding: 0.4rem 0.9rem 0.4rem 0.65rem; }
+.tm.is-phone .tm-seal-btn .tm-medal { width: 32px; height: 32px; margin: -16px 0 0 -16px; }
+.tm.is-phone .tm-count { font-size: 1rem; }
+.tm.is-phone .tm-grid { display: none; }

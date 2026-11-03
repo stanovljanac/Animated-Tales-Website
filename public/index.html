@@ -50,32 +50,23 @@
 <main>
 
 <!-- HERO: the story map, a hand-inked map of the world with a pin wherever an episode happened.
-     Built by map.js. Without JavaScript the plate shows the channel banner instead (the noscript
-     block below, with the push-in that matches the 1.06 zoom used in the videos). -->
+     Built by map.js. The plate starts as the channel banner (the cover below), which rolls up to
+     open the map. Without JavaScript, or if map.js fails, the banner is all there is. -->
 <section class="hero band" aria-labelledby="hero-title">
   <div class="wrap hero-inner">
     <div class="plate hero-plate">
-      <div class="tm" id="tale-map"></div>
-      <noscript>
-      <div class="hero-stage" data-parallax-root>
-        <img class="hero-img" src="img/banner.jpg" srcset="img/banner-1200.jpg 1200w, img/banner.jpg 1920w" sizes="(max-width: 1200px) 100vw, 1180px" width="1920" height="1072" alt="The Animated Tales banner: a hand-drawn ancient world of temples, a winding road and caravans on the left, a storm and a sailing ship on the right, with the words Animated Tales, Stories worth remembering.">
-        <div class="hero-fx" aria-hidden="true">
-          <span class="glow glow-storm"></span>
-          <span class="glow glow-sun"></span>
-          <svg class="cloud cloud-a" data-depth="0.18" viewBox="0 0 220 90"><path d="M20 70c-14 0-18-20-2-24 0-16 22-24 34-12 6-22 40-26 50-6 14-16 44-8 44 12 22-4 36 18 22 30z" /></svg>
-          <svg class="cloud cloud-b" data-depth="0.28" viewBox="0 0 220 90"><path d="M24 72c-16-2-14-22 2-24 2-14 22-18 30-8 10-18 38-18 46 0 12-10 34-4 34 12 18 0 26 18 12 20z" /></svg>
-          <div class="gulls" data-depth="0.4">
-            <svg class="gull g1" viewBox="0 0 40 16"><path d="M2 10 Q11 1 20 9 Q29 1 38 10" /></svg>
-            <svg class="gull g2" viewBox="0 0 40 16"><path d="M2 10 Q11 1 20 9 Q29 1 38 10" /></svg>
-            <svg class="gull g3" viewBox="0 0 40 16"><path d="M2 10 Q11 1 20 9 Q29 1 38 10" /></svg>
-          </div>
-          <span class="glint" style="--x:74%;--y:80%;--d:0s"></span>
-          <span class="glint" style="--x:83%;--y:88%;--d:1.4s"></span>
-          <span class="glint" style="--x:66%;--y:91%;--d:2.6s"></span>
-          <span class="glint" style="--x:58%;--y:76%;--d:3.7s"></span>
+      <div class="tm" id="tale-map">
+        <!-- The cover: the channel banner. map.js builds the map underneath, makes this a button that
+             nudges up from the bottom now and then, and rolls it up when it is pressed. Without
+             JavaScript it is simply the banner. -->
+        <div class="tm-cover" id="tm-cover">
+          <img class="tm-cover-img" src="img/banner.jpg" srcset="img/banner-1200.jpg 1200w, img/banner.jpg 1920w" sizes="(max-width: 1200px) 100vw, 1180px" width="1920" height="1072" fetchpriority="high" alt="The Animated Tales banner: a hand-drawn ancient world of temples, a winding road and caravans on the left, a storm and a sailing ship on the right, with the words Animated Tales, Stories worth remembering.">
+          <span class="tm-cover-tab" aria-hidden="true">
+            <svg viewBox="0 0 24 24" focusable="false"><path d="M5 15l7-7 7 7" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            Open the story map
+          </span>
         </div>
       </div>
-      </noscript>
     </div>
 
     <div class="tm-regions" id="tm-regions" hidden>

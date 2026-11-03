@@ -77,8 +77,6 @@
       r.mx = p[0]; r.my = p[1]; r.box = boxOf(r.fit);
       RG[r.id] = r;
     });
-    // Phones show only the Old World at world level: the whole globe is unreadable at 390px.
-    var OLD_WORLD = boxOf([-10, 18, 82, 66]);
     var WORLD_BOX = { x0: 0, y0: 0, x1: W, y1: H };
     // Chronological order: undated myth first, then by year.
     var CHRONO = EVENTS.slice().sort(function (a, b) {
@@ -98,15 +96,16 @@
     }
 
     // ------------------------------------------------------------------- DOM
-    mount.className = "tm";
+    // The banner cover (#tm-cover) is already in the page; the map is built underneath it.
+    var cover = document.getElementById("tm-cover");
+    mount.classList.add("tm", "is-world");
     mount.setAttribute("data-era", "all");
-    mount.classList.add("is-world");
-    mount.innerHTML =
+    var mapHTML =
       '<div class="tm-stagewrap">' +
         '<div class="tm-stage" id="tm-stage">' +
-          '<div class="tm-waves" aria-hidden="true"></div>' +
+          '<svg class="tm-waves" aria-hidden="true" focusable="false"><defs><pattern id="tm-wave-pat" width="34" height="17" patternUnits="userSpaceOnUse"><path d="M2 6q4-4 8 0t8 0M19 14q4-4 8 0t8 0" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></pattern></defs><rect width="100%" height="100%" fill="url(#tm-wave-pat)"/></svg>' +
           '<svg class="tm-svg" aria-hidden="true" focusable="false" viewBox="0 0 ' + W + " " + H + '" preserveAspectRatio="xMidYMid slice">' +
-            '<defs><path id="tm-land" d="' + WORLD.land + '"/></defs>' +
+            '<defs><path id="tm-land" d="' + WORLD.land + '"/><path id="tm-land-lo" d="' + WORLD.landLo + '"/></defs>' +
             '<g class="tm-halo"><use href="#tm-land" class="halo h2"/><use href="#tm-land" class="halo h1"/></g>' +
             '<use href="#tm-land" class="land"/>' +
             '<g class="tm-grid"></g>' +
@@ -134,9 +133,6 @@
           '<div class="tm-cartouche" aria-hidden="true"><b>Animated Tales</b><span>Stories worth remembering</span></div>' +
           '<div class="tm-hud">' +
             '<p class="tm-found"><span class="tm-found-label">Tales found</span> <b id="tm-found-n">0</b> / ' + EVENTS.length + "</p>" +
-            '<button type="button" class="tm-random btn btn-line btn-small" aria-label="Random tale">' +
-              '<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><rect x="4" y="4" width="16" height="16" rx="3" fill="none" stroke="currentColor" stroke-width="2"/><circle cx="9" cy="9" r="1.4" fill="currentColor"/><circle cx="15" cy="15" r="1.4" fill="currentColor"/><circle cx="15" cy="9" r="1.4" fill="currentColor"/><circle cx="9" cy="15" r="1.4" fill="currentColor"/></svg>' +
-              "<span class=\"tm-random-label\">Random tale</span></button>" +
           "</div>" +
           '<div class="tm-wipe" aria-hidden="true"></div>' +
         "</div>" +
@@ -149,6 +145,8 @@
       "</div>" +
       '<div class="tm-ages" role="radiogroup" aria-label="Show tales from one age"></div>' +
       '<p class="sr-only" id="tm-live" aria-live="polite"></p>';
+    mount.insertAdjacentHTML("afterbegin", mapHTML);
+    mount.classList.add("is-built");
 
     var stage = mount.querySelector("#tm-stage");
     var svg = mount.querySelector(".tm-svg");
@@ -165,7 +163,6 @@
     var regionsEl = document.getElementById("tm-regions-chips");
     var halo1 = svg.querySelector(".halo.h1"), halo2 = svg.querySelector(".halo.h2");
     var landUse = svg.querySelector(".land");
-    var introEl = null; // a real <path>, only while the ink-in intro runs: pathLength does not carry through <use>
 
     // ------------------------------------------------- map furniture (static)
     // World-space decoration is drawn once and shown only on the world view; at region zoom
@@ -324,22 +321,28 @@
     var cam = { cx: W / 2, cy: H / 2, w: W };
     var anim = 0;
     function sizeNow() { return { w: stage.clientWidth, h: stage.clientHeight }; }
-    // Below this the plate switches to the phone layout: 4:3 stage, Old World crop, bottom sheet.
+    // Below this the plate switches to the phone layout: a 3:2 stage and a bottom sheet.
     function isPhone() { return stage.clientWidth < 860; }
     function targetFrame() {
       var s = sizeNow();
       // With the side panel open, the camera frames the region in what is left of the stage.
       var padR = (state.tale && !isPhone()) ? panel.offsetWidth + 20 : 0;
-      var box = state.region === "world" ? (isPhone() ? OLD_WORLD : WORLD_BOX) : RG[state.region].box;
-      var air = state.region === "world" ? (isPhone() ? 1.12 : 1.02) : 1.2;
+      var box = state.region === "world" ? WORLD_BOX : RG[state.region].box;
+      var air = state.region === "world" ? 1.02 : 1.2;
       var freeW = s.w - padR;
       var k = Math.max((box.x1 - box.x0) * air / freeW, (box.y1 - box.y0) * air / s.h);
       return { cx: (box.x0 + box.x1) / 2 + (padR / 2) * k, cy: (box.y0 + box.y1) / 2, w: s.w * k };
     }
+    // While the camera flies, every frame is drawn again, so the cheap coast stands in for the fine
+    // one (and the halo and graticule are left out in CSS). The fine coast returns on landing.
+    function setFlying(on) {
+      mount.classList.toggle("is-flying", on);
+      landUse.setAttribute("href", on ? "#tm-land-lo" : "#tm-land");
+    }
     function flyTo(t, instant) {
       if (anim) { cancelAnimationFrame(anim); anim = 0; }
-      if (instant || reduce) { cam.cx = t.cx; cam.cy = t.cy; cam.w = t.w; mount.classList.remove("is-flying"); paint(); return; }
-      mount.classList.add("is-flying");
+      if (instant || reduce) { cam.cx = t.cx; cam.cy = t.cy; cam.w = t.w; setFlying(false); paint(); return; }
+      setFlying(true);
       var from = { cx: cam.cx, cy: cam.cy, w: cam.w }, t0 = null, dur = 780;
       function step(now) {
         if (t0 === null) t0 = now;
@@ -349,7 +352,7 @@
         cam.cy = from.cy + (t.cy - from.cy) * e;
         paint();
         if (p < 1) anim = requestAnimationFrame(step);
-        else { anim = 0; mount.classList.remove("is-flying"); }
+        else { anim = 0; setFlying(false); }
       }
       anim = requestAnimationFrame(step);
     }
@@ -382,7 +385,6 @@
       halo2.setAttribute("stroke-width", (26 * k).toFixed(3));
       halo1.setAttribute("stroke-width", (11 * k).toFixed(3));
       landUse.setAttribute("stroke-width", (1.3 * k).toFixed(3));
-      if (introEl) introEl.setAttribute("stroke-width", (1.6 * k).toFixed(3));
       grid.style.strokeWidth = (0.8 * k).toFixed(3);
 
       var list = [], off = 28;
@@ -399,7 +401,7 @@
       var world = state.region === "world";
       var freeW = (state.tale && !isPhone()) ? s.w - (panel.offsetWidth + 20) : s.w;
       var phone = isPhone();
-      separate(list, world ? (phone ? 50 : 60) : (phone ? 44 : 40));
+      separate(list, world ? (phone ? 38 : 60) : (phone ? 44 : 40));
       list.forEach(function (it) {
         it.x = Math.max(24, Math.min(s.w - 24, it.x)); it.y = Math.max(24, Math.min(s.h - 24, it.y));
         it.el.style.transform = "translate3d(" + it.x.toFixed(1) + "px," + it.y.toFixed(1) + "px,0)";
@@ -477,6 +479,7 @@
       if (regionsEl) {
         Array.prototype.forEach.call(regionsEl.children, function (b) {
           var id = b.getAttribute("data-key");
+          if (!id) return; // the "Random tale" button is an action, not a region
           b.setAttribute("aria-pressed", id === state.region ? "true" : "false");
           var n = id === "world" ? count(null, state.era) : count(id, state.era);
           b.querySelector(".count").textContent = n;
@@ -668,12 +671,13 @@
     document.addEventListener("keydown", function (ev) {
       if (ev.key === "Escape" && state.tale) { var id = state.tale; go({ tale: null }, { focus: "pin", pinId: id }); }
     });
-    mount.querySelector(".tm-random").addEventListener("click", function () {
+    // "Random tale" prefers a tale you have not opened yet.
+    function randomTale() {
       var pool = scope().filter(function (e) { return e.id !== state.tale; });
       var fresh = pool.filter(function (e) { return !found[e.id]; });
       var from = fresh.length ? fresh : pool;
       if (from.length) go({ tale: from[Math.floor(Math.random() * from.length)].id }, { focus: "panel" });
-    });
+    }
     agesEl.addEventListener("click", function (ev) {
       var b = ev.target.closest(".tm-age");
       if (b) go({ era: b.getAttribute("data-era") }, { origin: { x: ev.clientX, y: ev.clientY } });
@@ -692,16 +696,19 @@
       var regionChips = [{ id: "world", chip: "World" }].concat(REGIONS);
       regionsEl.innerHTML = regionChips.map(function (r) {
         return '<button type="button" class="chip" data-key="' + r.id + '" aria-pressed="false">' + esc(r.chip) + ' <span class="count"></span></button>';
-      }).join("");
+      }).join("") +
+        '<button type="button" class="chip tm-random" aria-label="Open a random tale">' +
+          '<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><rect x="4" y="4" width="16" height="16" rx="3" fill="none" stroke="currentColor" stroke-width="2"/><circle cx="9" cy="9" r="1.4" fill="currentColor"/><circle cx="15" cy="15" r="1.4" fill="currentColor"/><circle cx="15" cy="9" r="1.4" fill="currentColor"/><circle cx="9" cy="15" r="1.4" fill="currentColor"/></svg>' +
+          "Random tale</button>";
       regionsEl.addEventListener("click", function (ev) {
         var b = ev.target.closest(".chip");
-        if (b) go({ region: b.getAttribute("data-key"), tale: null });
+        if (!b) return;
+        if (b.classList.contains("tm-random")) randomTale();
+        else go({ region: b.getAttribute("data-key"), tale: null });
       });
-      var wrap = document.getElementById("tm-regions");
-      if (wrap) wrap.hidden = false;
     }
 
-    // A narrow stage switches to the phone layout (4:3 stage, Old World crop, bottom-sheet panel).
+    // A narrow stage switches to the phone layout (3:2 stage, bottom-sheet panel).
     // Toggling the class changes the stage height, which fires the observer once more; the second
     // pass finds nothing to change, so it settles.
     function relayout() {
@@ -710,6 +717,57 @@
     }
     if ("ResizeObserver" in window) new ResizeObserver(relayout).observe(stage);
     else window.addEventListener("resize", relayout);
+
+    // ------------------------------------------------------- the banner cover
+    // The plate opens as the channel banner. Now and then it lifts a little from the bottom, like
+    // a blind being tugged, so it reads as something to pull; a tap rolls it up and the map is
+    // underneath. Until then the map is inert, so nothing under the cover can be tabbed to.
+    var covered = false;
+    function setCovered(on) {
+      covered = on;
+      mount.classList.toggle("is-covered", on);
+      [mount.querySelector(".tm-stagewrap"), agesEl].forEach(function (n) {
+        if (on) n.setAttribute("inert", ""); else n.removeAttribute("inert");
+      });
+    }
+    function revealRegions() {
+      var wrap = document.getElementById("tm-regions");
+      if (wrap && wrap.hidden) { wrap.hidden = false; wrap.classList.add("tm-rise"); }
+    }
+    function dropCover() { if (cover && cover.parentNode) cover.parentNode.removeChild(cover); }
+    function openMap(opts) {
+      if (!covered) return;
+      opts = opts || {};
+      function finish() {
+        dropCover(); setCovered(false); revealRegions();
+        flyTo(targetFrame(), true); // the stage may have settled to a new size while covered
+        if (opts.keyboard) { var on = agesEl.querySelector('[aria-checked="true"]'); if (on) on.focus({ preventScroll: true }); }
+      }
+      if (!cover || opts.instant || reduce || !cover.animate) { finish(); return; }
+      var here = getComputedStyle(cover).transform; // wherever the peek has got to, so there is no jump
+      cover.classList.remove("is-hint");
+      mount.classList.add("is-opening");
+      revealRegions();
+      cover.animate(
+        [{ transform: here === "none" ? "translateY(0)" : here }, { transform: "translateY(-104%)" }],
+        { duration: 950, easing: "cubic-bezier(.6, .02, .2, 1)", fill: "forwards" }
+      ).onfinish = function () { mount.classList.remove("is-opening"); finish(); };
+    }
+    mount.addEventListener("click", function (ev) { if (covered) openMap({ keyboard: ev.detail === 0 }); });
+    if (cover) {
+      // Without JavaScript the cover is just the banner; here it becomes a button.
+      cover.setAttribute("role", "button");
+      cover.tabIndex = 0;
+      cover.setAttribute("aria-label", "Animated Tales. Open the story map.");
+      cover.addEventListener("keydown", function (ev) {
+        if (ev.key === "Enter" || ev.key === " ") { ev.preventDefault(); if (covered) openMap({ keyboard: true }); }
+      });
+    }
+
+    // Animations that never stop are paused while the plate is off screen.
+    if ("IntersectionObserver" in window) {
+      new IntersectionObserver(function (en) { mount.classList.toggle("is-offscreen", !en[0].isIntersecting); }).observe(mount);
+    }
 
     // ------------------------------------------------------------------ start
     var q = null;
@@ -725,21 +783,14 @@
     cam.cx = W / 2; cam.cy = H / 2; cam.w = W;
     paint();
     var go0 = { era: start.era, region: start.region, tale: start.tale };
-    // First frame: set the world camera at once, then fly to a deep-linked view.
-    if (!deep && !reduce) {
-      introEl = document.createElementNS(SVGNS, "path");
-      introEl.setAttribute("class", "intro");
-      introEl.setAttribute("pathLength", "1");
-      introEl.setAttribute("d", WORLD.land);
-      svg.appendChild(introEl);
-      mount.classList.add("is-intro");
-      setTimeout(function () {
-        mount.classList.remove("is-intro");
-        if (introEl) { introEl.remove(); introEl = null; }
-      }, 2700);
-    }
     state.era = "all"; state.region = "world"; state.tale = null;
     render({ instant: true });
+    if (cover && !deep) {
+      setCovered(true);
+      if (!reduce) cover.classList.add("is-hint");
+    } else {
+      dropCover(); revealRegions(); // a deep link goes straight to the map
+    }
     if (deep) { go(go0, { instant: true, speak: false, scroll: false }); }
   }
 })();

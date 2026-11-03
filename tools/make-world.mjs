@@ -9,6 +9,7 @@
 //   AT_GEO_DEPS=/tmp/geo node tools/make-world.mjs
 //
 // Izlaz je običan <script> (window.AT_WORLD), a ne .svg + fetch, da `file://` pregled radi.
+// Izlaz ima dve putanje obale: `land` (fina) i `landLo` (gruba, za vreme leta kamere).
 // Geometrija je Natural Earth (land-10m), projekcija Natural Earth 1 rotirana tako da je
 // centar mape na 50°E: Mediteran je levo od sredine, a ceo Pacifik (Fidži, Tonga, Tahiti,
 // Havaji) ostaje u komadu na desnoj strani. Antarktik je odsečen.
@@ -53,6 +54,8 @@ const ZONES = [
 const BASE_THRESHOLD = 0.24;  // deg² u grubim zonama (~0.4° detalj)
 const MIN_AREA_COARSE = 0.5;  // jedinice² ispod kojih se ostrvce u grubim zonama izbacuje
 const MIN_AREA_FINE = 0.012;
+const LO_THRESHOLD = 1.6;     // deg² za grubu obalu (~1.3° detalj)
+const LO_MIN_AREA = 3;
 
 // ---- učitavanje i pojednostavljenje --------------------------------------
 const topo = JSON.parse(fs.readFileSync(path.join(DEPS, 'node_modules/world-atlas/land-10m.json'), 'utf8'));
@@ -100,18 +103,31 @@ const ringArea = (ring) => {
   }
   return Math.abs(s) / 2;
 };
-const polys = [];
-for (const poly of land.coordinates) {
-  const maxLat = Math.max(...poly[0].map((p) => p[1]));
-  if (maxLat < -55) continue; // Antarktik
-  const c = poly[0][0];
-  const z = zoneOf(c[0], c[1]);
-  const min = z ? MIN_AREA_FINE : MIN_AREA_COARSE;
-  if (ringArea(poly[0]) < min) continue;
-  polys.push(poly.filter((ring, i) => i === 0 || ringArea(ring) >= min * 4));
+// Skuplja poligone u putanju. `zones` = true: sitna ostrva se u finim zonama zadržavaju.
+function toPath(multi, minCoarse, minFine, zones) {
+  const polys = [];
+  for (const poly of multi.coordinates) {
+    const maxLat = Math.max(...poly[0].map((p) => p[1]));
+    if (maxLat < -55) continue; // Antarktik
+    const c = poly[0][0];
+    const min = zones && zoneOf(c[0], c[1]) ? minFine : minCoarse;
+    if (ringArea(poly[0]) < min) continue;
+    polys.push(poly.filter((ring, i) => i === 0 || ringArea(ring) >= min * 4));
+  }
+  return { d: geoPath(proj).digits(2)(polys.length ? { type: 'MultiPolygon', coordinates: polys } : null), count: polys.length };
 }
-const geo = { type: 'MultiPolygon', coordinates: polys };
-const d = geoPath(proj).digits(2)(geo);
+const hi = toPath(land, MIN_AREA_COARSE, MIN_AREA_FINE, true);
+const d = hi.d;
+const polys = { length: hi.count };
+
+// Gruba obala: koristi se samo dok kamera leti, kad se svaki frejm iscrtava iznova. Bez zona,
+// pa ima nekoliko hiljada tačaka manje; kad kamera sleti, vraća se fina.
+const planarWeight = (t) => {
+  const [a, b, c] = t;
+  return Math.abs((a[0] - c[0]) * (b[1] - a[1]) - (a[0] - b[0]) * (c[1] - a[1])) / 2;
+};
+const landLo = asMulti(feature(simplify(presimplify(topo, planarWeight), LO_THRESHOLD), topo.objects.land));
+const lo = toPath(landLo, LO_MIN_AREA, LO_MIN_AREA, false);
 
 // ---- provera: projekcija koja se isporučuje == d3 ----------------------------
 const fn = `function (lon, lat) {
@@ -166,8 +182,10 @@ window.AT_WORLD = {
   h: ${H.toFixed(2)},
   // lon/lat -> koordinate mape; ista formula kao d3.geoNaturalEarth1().rotate([${ROT}, 0])
   project: ${fn},
-  land: "${d}"
+  land: "${d}",
+  // grublja obala, samo dok kamera leti
+  landLo: "${lo.d}"
 };
 `;
 fs.writeFileSync(path.join(PUBLIC, 'map-world.js'), out);
-console.log(`map-world.js: ${(out.length / 1024).toFixed(1)} KB, ${polys.length} poligona, ${W}x${H.toFixed(1)} (odnos ${(W / H).toFixed(2)})`);
+console.log(`map-world.js: ${(out.length / 1024).toFixed(1)} KB (fina ${(d.length / 1024).toFixed(1)}, gruba ${(lo.d.length / 1024).toFixed(1)}), ${hi.count} poligona, ${W}x${H.toFixed(1)} (odnos ${(W / H).toFixed(2)})`);

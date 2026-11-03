@@ -26,14 +26,17 @@ Stanje je provereno prema YouTube-u 29. 10. 2026.
 
 ## Mapa priča
 
-Hero je interaktivna ručno crtana mapa sveta: pin je mesto gde se priča iz videa desila. Svet se
+Hero je interaktivna ručno crtana mapa sveta: pin je mesto gde se priča iz videa desila. Ploča
+počinje kao baner kanala; povremeno se podigne 15 do 18% od dna, da se vidi da se povlači, a klik
+ili tap ga povlači nagore i otkriva mapu (link sa `?tale=`, `?era=` ili `?region=` preskače baner).
+Tek tada se pod ploču dodaje red regija i dugme „Random tale”. Svet se
 vidi kao po jedan pečat po regiji sa brojem priča; klik leti kamerom u regiju, gde je svaka priča
 poseban pin. Traka doba (Myth & Legend, Ancient World, Classical Antiquity, Middle Ages, Modern Era)
 boji pinove i menja izgled mape; pin otvara svitak sa videima, Shorts i oznakom vrste tvrdnje
 (record, tradition, debate). Stanje je u URL-u: `?era=classical&region=greece&tale=marathon`
 otvara taj pin direktno, pa link u opisu videa može da vodi na mapu.
 
-Kod: `map.js` (crtanje, kamera, pinovi, filteri, svitak), `map-world.js` (generisano: putanja
+Kod: `map.js` (baner, crtanje, kamera, pinovi, filteri, svitak), `map-world.js` (generisano: putanje
 kopna i projekcija), CSS u sekciji `Story map` u `styles.css`. Bez JavaScript-a ploča prikazuje
 baner kanala; ako `map.js` pukne, vraća se baner.
 
@@ -55,8 +58,9 @@ baner kanala; ako `map.js` pukne, vraća se baner.
 
 **Geometrija.** `map-world.js` je generisan i ne menja se rukom. Natural Earth kopno,
 projekcija Natural Earth 1 rotirana na 50°E (Mediteran levo od sredine, ceo Pacifik u komadu na
-desnoj strani), fin detalj samo u Egeju i na ostrvima Pacifika. Zavisnosti se instaliraju van
-repoa:
+desnoj strani), fin detalj samo u Egeju i na ostrvima Pacifika. Generator pravi i grubu obalu
+(`landLo`, ~12 KB) koja se crta samo dok kamera leti, da letenje ne iscrtava 120 KB putanje na
+svakom frejmu. Zavisnosti se instaliraju van repoa:
 
 ```
 mkdir /tmp/geo && cd /tmp/geo && npm init -y
