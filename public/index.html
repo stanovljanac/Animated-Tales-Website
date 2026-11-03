@@ -23,6 +23,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;700&family=Alegreya:ital,wght@0,400;0,500;0,700;1,400&family=Alegreya+SC:wght@500;700&display=swap">
 <link rel="stylesheet" href="styles.css">
+<script>document.documentElement.classList.add("js")</script>
 </head>
 <body>
 
@@ -48,10 +49,14 @@
 
 <main>
 
-<!-- HERO: the channel banner as a living plate. The push-in matches the 1.06 zoom used in the videos. -->
+<!-- HERO: the story map, a hand-inked map of the world with a pin wherever an episode happened.
+     Built by map.js. Without JavaScript the plate shows the channel banner instead (the noscript
+     block below, with the push-in that matches the 1.06 zoom used in the videos). -->
 <section class="hero band" aria-labelledby="hero-title">
   <div class="wrap hero-inner">
     <div class="plate hero-plate">
+      <div class="tm" id="tale-map"></div>
+      <noscript>
       <div class="hero-stage" data-parallax-root>
         <img class="hero-img" src="img/banner.jpg" srcset="img/banner-1200.jpg 1200w, img/banner.jpg 1920w" sizes="(max-width: 1200px) 100vw, 1180px" width="1920" height="1072" alt="The Animated Tales banner: a hand-drawn ancient world of temples, a winding road and caravans on the left, a storm and a sailing ship on the right, with the words Animated Tales, Stories worth remembering.">
         <div class="hero-fx" aria-hidden="true">
@@ -70,6 +75,12 @@
           <span class="glint" style="--x:58%;--y:76%;--d:3.7s"></span>
         </div>
       </div>
+      </noscript>
+    </div>
+
+    <div class="tm-regions" id="tm-regions" hidden>
+      <p class="tm-regions-label" id="tm-regions-label">Fly to a region</p>
+      <div class="chips" id="tm-regions-chips" role="group" aria-labelledby="tm-regions-label"></div>
     </div>
 
     <div class="hero-copy">
@@ -344,6 +355,9 @@
   </div>
 </footer>
 
+<script src="data.js"></script>
+<script src="map-world.js"></script>
 <script src="main.js"></script>
+<script src="map.js"></script>
 </body>
 </html>

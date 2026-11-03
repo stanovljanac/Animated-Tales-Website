@@ -1,12 +1,14 @@
 # Animated Tales — sajt kanala
 
 Statičan sajt za YouTube kanal *Animated Tales*: <https://animatedtales.mihailobuilds.com>.
-Bez build koraka — `public/index.html`, `public/styles.css`, `public/main.js` i mediji pored njih.
+Bez build koraka — `public/index.html`, `public/styles.css`, `public/data.js`, `public/main.js`,
+`public/map.js`, `public/map-world.js` i mediji pored njih.
 Nastao je od claude.ai artifacta <https://claude.ai/artifact/KQN1oEWsnZbue8ahJUB5Hs>; od 29. 10. 2026.
 izvor istine je ovaj repo, artifact se više ne ažurira.
 
 ```
-public/         sve što se objavljuje (index.html, styles.css, main.js, img/, media/, robots.txt, sitemap.xml)
+public/         sve što se objavljuje (index.html, styles.css, data.js, main.js, map.js, map-world.js, img/, media/, robots.txt, sitemap.xml)
+tools/          jednokratni alat koji pravi geometriju mape (make-world.mjs); ne objavljuje se
 wrangler.jsonc  Cloudflare Pages objavljuje public/ kao statičan sajt, bez instalacije i builda
 ```
 
@@ -16,10 +18,55 @@ ijednom ukine javno deljenje, link na sajtu vodi na stranicu za prijavu.
 
 ## Podaci
 
-Svi podaci o videima (ID, naslov, trajanje, članstvo u plejlistama, Shorts) žive u jednom bloku na
-vrhu `public/main.js`. Nova epizoda = jedan unos u `EPISODES` i njen ID u odgovarajućim `PLAYLISTS`.
+Svi podaci žive u `public/data.js` (`window.AT_DATA`): podaci o videima (ID, naslov, trajanje,
+članstvo u plejlistama, Shorts) i podaci mape (`ERAS`, `REGIONS`, `EVENTS`). Nova epizoda = jedan
+unos u `EPISODES`, njen ID u odgovarajućim `PLAYLISTS` i jedan događaj u `EVENTS` (vidi Mapa priča).
 Brojevi u „ledger“ bloku (`index.html`, sekcija About) i Part 3 u sekciji Series pišu se ručno.
 Stanje je provereno prema YouTube-u 29. 10. 2026.
+
+## Mapa priča
+
+Hero je interaktivna ručno crtana mapa sveta: pin je mesto gde se priča iz videa desila. Svet se
+vidi kao po jedan pečat po regiji sa brojem priča; klik leti kamerom u regiju, gde je svaka priča
+poseban pin. Traka doba (Myth & Legend, Ancient World, Classical Antiquity, Middle Ages, Modern Era)
+boji pinove i menja izgled mape; pin otvara svitak sa videima, Shorts i oznakom vrste tvrdnje
+(record, tradition, debate). Stanje je u URL-u: `?era=classical&region=greece&tale=marathon`
+otvara taj pin direktno, pa link u opisu videa može da vodi na mapu.
+
+Kod: `map.js` (crtanje, kamera, pinovi, filteri, svitak), `map-world.js` (generisano: putanja
+kopna i projekcija), CSS u sekciji `Story map` u `styles.css`. Bez JavaScript-a ploča prikazuje
+baner kanala; ako `map.js` pukne, vraća se baner.
+
+**Dodavanje pina.** U `data.js`, u `EVENTS`, jedan unos:
+
+```js
+{ id: "marathon", name: "The Battle of Marathon", place: "The plain of Marathon, Greece",
+  lat: 38.12, lon: 23.98, year: -490, region: "greece", claim: "record",
+  text: "Dve-tri rečenice.", videos: ["nUQkW9Umv8M"], shorts: [] }
+```
+
+- Doba se računa iz `year` (negativno = p.n.e.), nikad se ne upisuje. Bez datuma: `myth: true`
+  umesto `year`. `circa: true` piše „c.”; `when` zamenjuje ceo ispis datuma.
+- `region` je jedna od `REGIONS` (nova regija = jedan unos sa `fit` okvirom i pozicijom pečata).
+- Jedan video može imati više pinova (Antikitera ima olupinu i otkriće), a jedan pin više videa.
+- `claim` se odnosi na tekst pina, ne na ceo video.
+- Brojači, pečati regija i čipovi se ažuriraju sami.
+- Mitovi nemaju pravo mesto: pin ide u regiju u kojoj je priča smeštena i to piše u `place`.
+
+**Geometrija.** `map-world.js` je generisan i ne menja se rukom. Natural Earth kopno,
+projekcija Natural Earth 1 rotirana na 50°E (Mediteran levo od sredine, ceo Pacifik u komadu na
+desnoj strani), fin detalj samo u Egeju i na ostrvima Pacifika. Zavisnosti se instaliraju van
+repoa:
+
+```
+mkdir /tmp/geo && cd /tmp/geo && npm init -y
+npm i d3-geo@3.1.1 topojson-client@3.1.0 topojson-simplify@3.0.3 world-atlas@2.0.2
+cd <repo> && AT_GEO_DEPS=/tmp/geo node tools/make-world.mjs
+```
+
+Alat uz to proverava da isporučena projekcija odgovara d3, i ispisuje za svaki pin da li pada na
+kopno u izvornom 10m skupu (`kopno` ili `MORE` sa udaljenošću do obale). Olupina Antikitere leži
+pod vodom tik uz obalu ostrva, pa joj je pin namerno na ostrvu; ostali pinovi su na mestu događaja.
 
 ## Lokalni pregled
 

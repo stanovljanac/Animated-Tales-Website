@@ -3,84 +3,9 @@
 
   var YT = "https://www.youtube.com/";
 
-  // ---------------------------------------------------------------------------
-  // Data. IDs, titles, lengths and playlist membership were checked against
-  // YouTube on 2026-10-29. Adding an episode is one entry here.
-  // ---------------------------------------------------------------------------
-  var EPISODES = {
-    "_eKElXW9Hk4": { thumb: "antikythera", dur: "4:06", label: "Greece · the wreck of 1900",
-      title: "Divers Found a 2,000-Year-Old Greek Computer in a Shipwreck",
-      hook: "Sponge divers raise a lump of bronze. Inside it are gears that tracked the Sun and Moon and predicted eclipses." },
-    "aE1EFPZLo3E": { thumb: "greek-gods-1", dur: "4:03", label: "Greek Gods · Part 1",
-      title: "Zeus, Poseidon and Hades Drew Lots for the Universe",
-      hook: "Three brothers divide the sky, the sea and the underworld. The place to start the series." },
-    "MZ5I5s2hapA": { thumb: "tyr-and-fenrir", dur: "3:31", label: "Norse myth",
-      title: "The God Who Sacrificed His Hand to Save the World",
-      hook: "The gods bind the wolf Fenrir with a ribbon made of six impossible things. Týr pays the price." },
-    "DBGWroAot-4": { thumb: "harem-conspiracy", dur: "4:35", label: "Egypt · c. 1155 BC",
-      title: "The Harem Conspiracy That Killed Ramesses III",
-      hook: "A plot against the pharaoh from inside his own palace, known from the trial records." },
-    "NHMGOOVNNk0": { thumb: "heavenly-horses", dur: "4:42", label: "Han China · 104–102 BC",
-      title: "A Kingdom Refused to Sell Its Horses. So China Sent an Army",
-      hook: "Dayuan would not sell its horses. The emperor would not let his beaten army back through the Jade Gate." },
-    "nUQkW9Umv8M": { thumb: "marathon", dur: "5:08", label: "Greece · 490 BC",
-      title: "The Battle of Marathon: The Battle Won by a Dead Man's Army",
-      hook: "Athens against the Persian landing at Marathon, told from an unexpected angle." },
-    "asH-WNx94kA": { thumb: "greek-gods-2", dur: "4:41", label: "Greek Gods · Part 2",
-      title: "Marriage, Harvest or Hearth: Which Goddess Held the Real Power?",
-      hook: "Hera, Demeter and Hestia got no kingdom of their own. Each found a different kind of power." },
-    "_1h_EAjb_wk": { thumb: "sack-of-rome", dur: "3:38", label: "Rome · 390 BC",
-      title: "The Gallic Sack of Rome after the Battle of the Allia in 390 BC",
-      hook: "The Gauls broke a Roman army at the river Allia and walked into the city itself." },
-    "Mrai30wItZI": { thumb: "polynesian", dur: "3:49", label: "The Pacific",
-      title: "How Humans Learned to Cross Entire Oceans Without a Compass",
-      hook: "Polynesian navigators found islands by reading the stars, the swells, the birds and the clouds." },
-    "hsGI3xlJ-SY": { thumb: "croesus", dur: "3:09", label: "Lydia · 546 BC",
-      title: "The Last Lydian King: The Prophecy That Destroyed His Kingdom",
-      hook: "Croesus asks Delphi whether to attack Persia. The answer is true, and it ruins him." }
-  };
-
-  var SHORTS = {
-    "ya6UUlhU648": "Poseidon and Apollo Both Proposed. Hestia Refused Them Both",
-    "cU085EwoFs8": "Zeus Promised Their Daughter to Hades Without Telling Demeter",
-    "IGr4Zwxyetk": "Hera the Widow, Wife of a God Who Could Never Die",
-    "VIWp3jvBtwo": "The Greek Gods Divided Universe Except One Thing",
-    "BSsP9n2tbSc": "Why Were the Gods Afraid of This Wolf? Who Is Fenrir?",
-    "qAfoX8bUg_k": "When Rome Was Almost Erased from History",
-    "2vnd3hiaP2U": "The Plot Against Ramesses III",
-    "hAbpc4Q_14Q": "He Sent an Army to War. Then Refused to Let Them Home",
-    "u9WZwX3Iktw": "One of China's Biggest Military Problems Wasn't Weapons, but Horses",
-    "Ci5iIipPjEk": "Divers Thought the Seabed Was Covered in Bodies"
-  };
-
-  var FEATURED = ["_eKElXW9Hk4", "aE1EFPZLo3E", "MZ5I5s2hapA", "DBGWroAot-4", "NHMGOOVNNk0", "nUQkW9Umv8M"];
-
-  var PLAYLISTS = [
-    { id: "PLCYDtXyl-EcU", chip: "Greek Mythology", name: "Greek Mythology", emblem: "bolt",
-      blurb: "The Greek Gods series in order, from the lottery for the universe to the three sisters.",
-      videos: ["aE1EFPZLo3E", "asH-WNx94kA"], shorts: ["ya6UUlhU648", "cU085EwoFs8", "IGr4Zwxyetk", "VIWp3jvBtwo"] },
-    { id: "PLfVGPcCCcFU8", chip: "Norse Mythology", name: "Norse Mythology", emblem: "wolf",
-      blurb: "Gods, giants and the wolf who could only be held by a ribbon.",
-      videos: ["MZ5I5s2hapA"], shorts: ["BSsP9n2tbSc"] },
-    { id: "PLBQAMHoMK26c", chip: "Greek History", name: "Greek History", emblem: "amphora",
-      blurb: "Marathon, the oracle at Delphi and a machine pulled out of a shipwreck.",
-      videos: ["_eKElXW9Hk4", "hsGI3xlJ-SY", "nUQkW9Umv8M"], shorts: [] },
-    { id: "PLc1nD6MP3I24", chip: "Rome", name: "Rome History", emblem: "aquila",
-      blurb: "The night the Gauls walked into Rome, and how close the city came to ending there.",
-      videos: ["_1h_EAjb_wk"], shorts: ["qAfoX8bUg_k"] },
-    { id: "PLMwghrro-9SQ", chip: "Egypt", name: "Egypt Stories", emblem: "ankh",
-      blurb: "Pharaohs, palace plots and the papyrus records that survived them.",
-      videos: ["DBGWroAot-4"], shorts: ["2vnd3hiaP2U"] },
-    { id: "PLckjrsCMM-LY", chip: "China", name: "China History", emblem: "horse",
-      blurb: "Han China and the long war for the horses of the Ferghana valley.",
-      videos: ["NHMGOOVNNk0"], shorts: ["hAbpc4Q_14Q", "u9WZwX3Iktw"] },
-    { id: "PLCJ0-2X4_lHM", chip: "Mysteries", name: "Ancient Mysteries & Discoveries", emblem: "compass",
-      blurb: "Things that look impossible for their time, and what is actually known about them.",
-      videos: ["_eKElXW9Hk4", "Mrai30wItZI"], shorts: ["Ci5iIipPjEk"] },
-    { id: "PLJV7xQyHhydw", chip: "Battles", name: "History Battles", emblem: "helmet",
-      blurb: "Armies, decisions and what they cost.",
-      videos: ["NHMGOOVNNk0", "nUQkW9Umv8M"], shorts: ["hAbpc4Q_14Q", "u9WZwX3Iktw"] }
-  ];
+  // Episode, Shorts and playlist data lives in data.js (window.AT_DATA).
+  var D = window.AT_DATA;
+  var EPISODES = D.EPISODES, SHORTS = D.SHORTS, FEATURED = D.FEATURED, PLAYLISTS = D.PLAYLISTS;
 
   // ---------------------------------------------------------------------------
   // Ornaments: small hand-inked 2D objects. ".s" = ink stroke (drawn in on
@@ -306,6 +231,9 @@
     el.innerHTML = ORN[name]();
     el.querySelectorAll(".s").forEach(function (p) { p.setAttribute("pathLength", "1"); });
   }
+
+  // Shared with map.js, which loads after this file.
+  window.AT = { YT: YT, svg: svg, both: both, ORN: ORN, drawOrnament: drawOrnament, esc: esc, ext: ext };
 
   // ---------------------------------------------------------------------------
   // Episodes grid + playlist chips

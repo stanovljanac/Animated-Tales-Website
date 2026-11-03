@@ -555,3 +555,333 @@ a.series-item:hover { transform: translateX(4px); box-shadow: -4px 0 0 var(--gol
   html { scroll-behavior: auto; }
   *, *::before, *::after { animation: none !important; transition: none !important; }
 }
+
+/* =====================================================================================
+   Story map (hero). map.js builds the DOM; data.js says what is on it.
+   The map is an illustration, like the banner it replaced: its palette does not follow the
+   page's dark mode. The era bar, the region chips and the panel do, and use the site tokens.
+   ===================================================================================== */
+
+/* Era colours for pins, seals and the era bar. `all` is the unfiltered gold. */
+[data-era-pin="all"]       { --pin: #c9993f; --pin-ink: #1f2430; }
+[data-era-pin="myth"]      { --pin: #4b4f9c; --pin-ink: #f7ecd6; }
+[data-era-pin="ancient"]   { --pin: #d49a2c; --pin-ink: #1f2430; }
+[data-era-pin="classical"] { --pin: #b5532f; --pin-ink: #f7ecd6; }
+[data-era-pin="medieval"]  { --pin: #8e1f2b; --pin-ink: #f7ecd6; }
+[data-era-pin="modern"]    { --pin: #1f4a7a; --pin-ink: #f7ecd6; }
+.tm[data-era="myth"]      { --era-pin: #4b4f9c; --era-ink: #f7ecd6; }
+.tm[data-era="ancient"]   { --era-pin: #d49a2c; --era-ink: #1f2430; }
+.tm[data-era="classical"] { --era-pin: #b5532f; --era-ink: #f7ecd6; }
+.tm[data-era="medieval"]  { --era-pin: #8e1f2b; --era-ink: #f7ecd6; }
+.tm[data-era="modern"]    { --era-pin: #1f4a7a; --era-ink: #f7ecd6; }
+
+/* The hero grid must not grow with the era bar's scrolling content: a column of plain `auto`
+   takes the widest min-content, which would push the plate wider than a phone. */
+.hero-inner { grid-template-columns: minmax(0, 1fr); }
+.js #tale-map:empty { aspect-ratio: 1000 / 431.7; } /* hold the space until map.js has built the map */
+.tm-fallback .hero-img { width: 100%; height: auto; }
+.tm { position: relative; background: var(--surface); }
+.tm-stagewrap { position: relative; overflow: hidden; }
+
+/* ---------- Stage and skins ---------- */
+.tm-stage {
+  /* default skin: the channel banner's parchment and verdigris */
+  --m-sea: #a9c4b6; --m-land: #efe0b6; --m-coast: #1f2430; --m-line: #1f2430;
+  --m-halo: #dbe9df; --m-wave: rgba(255, 255, 255, 0.28); --m-grid: 0.14;
+  --m-fog: 244, 236, 214; --m-fogtext: #1f2430;
+  --orn-gold: #d7ae5a; --orn-teal: #5f9c8f; --orn-paper: #f4ead2; --orn-clay: #b77b52; --orn-storm: #55606e;
+  position: relative; isolation: isolate; overflow: hidden;
+  aspect-ratio: 1000 / 431.7;
+  background: var(--m-sea);
+  transition: background-color 0.01s;
+}
+.tm.is-phone .tm-stage { aspect-ratio: 4 / 3; }
+/* Myth: the night map. Dark blue paper, gold coast, constellations over the sea. */
+.tm[data-era="myth"] .tm-stage { --m-sea: #1b2142; --m-land: #2b3466; --m-coast: #e0b862; --m-line: #e0b862; --m-halo: #3a4a8f; --m-wave: rgba(224, 184, 98, 0.16); --m-grid: 0; --m-fog: 27, 33, 66; --m-fogtext: #f3ead5; }
+/* Ancient World: papyrus. Warm sand, turquoise sea, reed fibres over everything. */
+.tm[data-era="ancient"] .tm-stage { --m-sea: #6faea3; --m-land: #e8cc8c; --m-coast: #3b2a14; --m-line: #3b2a14; --m-halo: #a8d3c8; --m-wave: rgba(255, 255, 255, 0.3); --m-grid: 0; }
+/* Classical Antiquity: black-figure pottery. Clay-orange sea, black glaze land, incised coast, meander border. */
+.tm[data-era="classical"] .tm-stage { --m-sea: #cf7a45; --m-land: #2b2420; --m-coast: #f2d4a0; --m-line: #2b2420; --m-halo: #e7a06f; --m-wave: rgba(43, 36, 32, 0.16); --m-grid: 0; }
+/* Middle Ages: vellum portolan. Pale land, sage sea, a serpent and the four winds. */
+.tm[data-era="medieval"] .tm-stage { --m-sea: #b9c8b2; --m-land: #f0e4c4; --m-coast: #3a2a22; --m-line: #3a2a22; --m-halo: #e3ecd9; --m-wave: rgba(70, 95, 70, 0.18); --m-grid: 0; }
+/* Modern Era: navigation chart. Blue-grey sea, sharp ink, graticule and rhumb lines. */
+.tm[data-era="modern"] .tm-stage { --m-sea: #9db8cb; --m-land: #efe7d2; --m-coast: #14253b; --m-line: #14253b; --m-halo: #cfe0ec; --m-wave: rgba(255, 255, 255, 0.3); --m-grid: 0.4; }
+
+.tm-stage .ink .s { stroke: var(--m-line); }
+.tm-stage .ink .f-ink { fill: var(--m-line); }
+.tm-stage .ink .f-bg { fill: var(--m-land); }
+
+/* The sea is a CSS layer so the only thing that moves all the time is cheap to repaint. */
+.tm-waves {
+  position: absolute; inset: -34px -34px -34px -68px; pointer-events: none; will-change: transform;
+  background: var(--m-wave);
+  -webkit-mask: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='34' height='17' viewBox='0 0 34 17'><path d='M2 6q4-4 8 0t8 0M19 14q4-4 8 0t8 0' fill='none' stroke='black' stroke-width='1.3' stroke-linecap='round'/></svg>") repeat 0 0 / 34px 17px;
+          mask: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='34' height='17' viewBox='0 0 34 17'><path d='M2 6q4-4 8 0t8 0M19 14q4-4 8 0t8 0' fill='none' stroke='black' stroke-width='1.3' stroke-linecap='round'/></svg>") repeat 0 0 / 34px 17px;
+}
+.tm-svg { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
+.tm-svg .halo { fill: var(--m-halo); stroke: var(--m-halo); stroke-linejoin: round; stroke-linecap: round; }
+.tm-svg .halo.h2 { opacity: 0.3; }
+.tm-svg .halo.h1 { opacity: 0.5; }
+.tm-svg .land { fill: var(--m-land); stroke: var(--m-coast); stroke-linejoin: round; }
+.tm-svg .grid-line { fill: none; stroke: var(--m-line); opacity: var(--m-grid); }
+.tm-svg .land, .tm-svg .halo, .tm-svg .grid-line { transition: opacity 0.9s ease; }
+/* While the camera flies, the halo strokes and the graticule (the costliest layers to repaint)
+   are left out; they fade back in when it lands. */
+.tm.is-flying .tm-svg .halo, .tm.is-flying .tm-svg .grid-line { opacity: 0; visibility: hidden; transition: none; }
+
+/* Ink-in intro: the coast is drawn first, then the land and the pins fade in. */
+.tm-svg .intro { fill: none; stroke: var(--m-coast); stroke-linejoin: round; stroke-dasharray: 1 1; stroke-dashoffset: 1; animation: tm-draw 2.5s cubic-bezier(.5, 0, .3, 1) forwards; }
+.tm.is-intro .tm-svg .land, .tm.is-intro .tm-svg .halo, .tm.is-intro .tm-svg .grid-line,
+.tm.is-intro .tm-items, .tm.is-intro .tm-hud, .tm.is-intro .tm-cartouche { opacity: 0; }
+.tm-items, .tm-hud, .tm-cartouche { transition: opacity 0.9s ease; }
+@keyframes tm-draw { to { stroke-dashoffset: 0; } }
+
+/* World-space decoration: only on the world view, where its size makes sense. */
+.wd { opacity: 0; transition: opacity 0.6s ease; }
+.tm.is-world[data-era="myth"] .wd-myth, .tm.is-world[data-era="classical"] .wd-classical,
+.tm.is-world[data-era="medieval"] .wd-medieval, .tm.is-world[data-era="modern"] .wd-modern { opacity: 1; }
+.const-line { fill: none; stroke: var(--m-line); stroke-width: 0.6; stroke-dasharray: 3 2; opacity: 0.85; }
+.const-star { fill: #fff3c4; }
+.rhumb { fill: none; stroke: var(--m-line); stroke-width: 0.35; opacity: 0.4; }
+.rose-dot { fill: var(--m-line); }
+.serpent { fill: none; stroke: var(--m-line); stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+.serpent.thin { stroke-width: 1; }
+
+/* Screen-space corner furniture: one group per age. */
+.tm-corners, .tm-fx, .tm-leaders { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; z-index: 2; }
+.tm[data-era="myth"] .tm-fx, .tm[data-era="classical"] .tm-fx { opacity: 0; }
+.tm-fx .cloud-a { left: 5%; top: 38%; }
+.tm-fx .cloud-b { left: 56%; top: 64%; }
+.cn { position: absolute; inset: 0; opacity: 0; transition: opacity 0.6s ease; }
+.tm[data-era="myth"] .cn-myth, .tm[data-era="ancient"] .cn-ancient, .tm[data-era="classical"] .cn-classical,
+.tm[data-era="medieval"] .cn-medieval, .tm[data-era="modern"] .cn-modern { opacity: 1; }
+.starfield i { position: absolute; width: 3px; height: 3px; border-radius: 50%; background: #fff3c4; opacity: 0.8; }
+.starfield i:nth-child(3n) { width: 2px; height: 2px; opacity: 0.55; }
+.moon { position: absolute; top: 12px; right: 31%; width: 52px; fill: #f3e3a8; stroke: #e0b862; stroke-width: 1.5; }
+.sun { position: absolute; top: 10px; right: 31%; width: 62px; fill: #f0c25a; stroke: #3b2a14; stroke-width: 1.6; stroke-linecap: round; }
+.fibres { position: absolute; inset: 0; mix-blend-mode: multiply;
+  background: repeating-linear-gradient(90deg, rgba(120, 90, 40, 0.11) 0 1px, transparent 1px 5px), repeating-linear-gradient(0deg, rgba(120, 90, 40, 0.08) 0 1px, transparent 1px 9px); }
+.meander-strip {
+  position: absolute; left: 0; right: 0; height: 22px; background: #f2d4a0;
+  -webkit-mask: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='44' height='22' viewBox='0 0 44 22'><path d='M0 2H44M0 20H44M2 20V6H16V14H9V10' fill='none' stroke='black' stroke-width='2'/><path d='M24 20V6H38V14H31V10' fill='none' stroke='black' stroke-width='2'/></svg>") repeat-x center / 44px 22px;
+          mask: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='44' height='22' viewBox='0 0 44 22'><path d='M0 2H44M0 20H44M2 20V6H16V14H9V10' fill='none' stroke='black' stroke-width='2'/><path d='M24 20V6H38V14H31V10' fill='none' stroke='black' stroke-width='2'/></svg>") repeat-x center / 44px 22px;
+}
+.meander-strip.top { top: 0; }
+.meander-strip.bottom { bottom: 0; }
+.tm[data-era="classical"] .tm-hud { top: 34px; }
+.tm[data-era="classical"] .tm-cartouche { bottom: 34px; }
+.wind { position: absolute; width: 62px; }
+.wind.tc { top: 4px; left: 50%; margin-left: -31px; }
+.wind.tr { top: 4px; right: 8px; transform: scaleX(-1); }
+.wind.bl { bottom: 4px; left: 8px; }
+.wind.br { bottom: 4px; right: 8px; transform: scaleX(-1); }
+.w-face { fill: #f3dfb0; stroke: #3a2a22; stroke-width: 1.6; }
+.w-ink { fill: #3a2a22; }
+.w-line { fill: none; stroke: #3a2a22; stroke-width: 1.6; stroke-linecap: round; }
+.cn-modern .rose { position: absolute; right: 14px; bottom: 14px; width: 84px; height: 84px; }
+.cn-modern .rose > svg { display: block; width: 100%; height: 100%; }
+
+.tm-leaders { z-index: 2; }
+.leader { stroke: var(--m-line); stroke-width: 1.2; stroke-dasharray: 3 2; }
+.leader-dot { fill: var(--m-line); }
+
+/* ---------- Seals (world view) and pins (region view) ---------- */
+.tm-items { position: absolute; inset: 0; z-index: 3; }
+.tm-item {
+  position: absolute; left: 0; top: 0; width: 44px; height: 44px; margin: -22px 0 0 -22px; padding: 0;
+  border: 0; background: none; color: #1f2430; font: inherit; cursor: pointer;
+  -webkit-tap-highlight-color: transparent; will-change: transform;
+  transition: opacity 0.35s ease;
+}
+.tm-item.is-hidden, .tm-item.is-off { opacity: 0; visibility: hidden; pointer-events: none; transition: opacity 0.25s ease, visibility 0s 0.25s; }
+.tm-medal {
+  position: absolute; left: 50%; top: 50%; width: 34px; height: 34px; margin: -17px 0 0 -17px;
+  display: grid; place-items: center;
+  border-radius: 52% 48% 50% 50% / 50% 52% 48% 50%;
+  background: var(--pin, #c9993f); color: var(--pin-ink, #1f2430);
+  border: 2px solid #1f2430;
+  box-shadow: 0 0 0 2.5px rgba(246, 239, 220, 0.9), 3px 3px 0 2.5px rgba(0, 0, 0, 0.3);
+  transition: transform 0.2s cubic-bezier(.3, 1.6, .5, 1);
+}
+.tm-medal svg { width: 20px; height: 20px; }
+.tm-item:hover .tm-medal, .tm-item:focus-visible .tm-medal { transform: scale(1.14) rotate(-4deg); }
+.tm-item:focus-visible { outline: none; }
+.tm-item:focus-visible .tm-medal { box-shadow: 0 0 0 3px #fff, 0 0 0 6px #1f2430; }
+.tm-seal-btn .tm-medal { width: 42px; height: 42px; margin: -21px 0 0 -21px; --pin: var(--era-pin, #c9993f); --pin-ink: var(--era-ink, #1f2430); }
+.tm-count { font-family: var(--font-display); font-weight: 700; font-size: 1.15rem; line-height: 1; }
+.tm-seal-btn.is-empty .tm-medal { background: rgba(246, 239, 220, 0.78); color: #54493a; border-style: dashed; box-shadow: none; }
+.tm-tick { display: none; position: absolute; right: -6px; top: -6px; width: 15px; height: 15px; border-radius: 50%; background: #2b6a60; border: 1.5px solid #f6efdc; }
+.tm-tick::after { content: ""; position: absolute; left: 4px; top: 1.5px; width: 3px; height: 6px; border: solid #f6efdc; border-width: 0 1.8px 1.8px 0; transform: rotate(40deg); }
+.is-found .tm-tick { display: block; }
+
+.tm-tag {
+  position: absolute; left: 50%; top: calc(50% + 26px); transform: translateX(-50%);
+  white-space: nowrap; pointer-events: none;
+  font-family: var(--font-label); font-weight: 700; font-size: 0.92rem; letter-spacing: 0.05em; line-height: 1.2;
+  color: #1f2430; background: rgba(246, 239, 220, 0.94); border: 1.5px solid #1f2430; padding: 1px 8px;
+}
+.tm-tag small { display: block; font-family: var(--font-body); font-weight: 500; font-size: 0.78rem; letter-spacing: 0; color: #54493a; }
+.tm-pin .tm-tag { left: calc(50% + 26px); top: 50%; transform: translateY(-50%); opacity: 0; transition: opacity 0.15s ease; }
+.tm-pin.tag-left .tm-tag { left: auto; right: calc(50% + 26px); }
+.tm-pin:hover .tm-tag, .tm-pin:focus-visible .tm-tag, .tm-pin.is-current .tm-tag { opacity: 1; }
+.tm-pin.is-current, .tm-pin:hover, .tm-pin:focus-visible { z-index: 2; }
+.side-t .tm-tag { top: auto; bottom: calc(50% + 26px); }
+.side-l .tm-tag { left: auto; right: calc(50% + 28px); top: 50%; transform: translateY(-50%); }
+.side-r .tm-tag { left: calc(50% + 28px); top: 50%; transform: translateY(-50%); }
+.tm.is-phone .tm-seal-btn .tm-tag { display: none; }
+
+/* ---------- HUD, cartouche, fog ---------- */
+.tm-hud { position: absolute; left: 12px; top: 12px; z-index: 5; display: flex; flex-wrap: wrap; align-items: center; gap: 0.5rem; }
+.tm-found {
+  font-family: var(--font-label); font-weight: 700; font-size: 0.95rem; letter-spacing: 0.04em; line-height: 1.3;
+  background: #f6efdc; color: #1f2430; border: 2px solid #1f2430; padding: 0.16rem 0.6rem; box-shadow: 2px 2px 0 rgba(0, 0, 0, 0.35);
+}
+.tm-found b { font-family: var(--font-body); }
+.all-found .tm-found { background: #c9993f; }
+.tm-random { background: #f6efdc; color: #1f2430; border-color: #1f2430; box-shadow: 2px 2px 0 rgba(0, 0, 0, 0.35); }
+.tm-random svg { width: 1.15em; height: 1.15em; }
+.tm.is-phone .tm-found-label { display: none; }
+
+.tm-cartouche {
+  position: absolute; z-index: 4; left: 50%; bottom: 12px; transform: translateX(-50%);
+  display: grid; gap: 1px; text-align: center; padding: 0.5rem 1.2rem 0.45rem;
+  background: #f6efdc; color: #1f2430; border: 2px solid #1f2430; outline: 1px solid #1f2430; outline-offset: 3px;
+  box-shadow: 3px 3px 0 rgba(0, 0, 0, 0.35);
+  transition: left 0.5s ease, transform 0.5s ease, opacity 0.9s ease;
+}
+.tm-cartouche b { font-family: var(--font-display); font-weight: 700; font-size: clamp(0.95rem, 0.7rem + 1vw, 1.45rem); letter-spacing: 0.1em; text-transform: uppercase; line-height: 1.1; }
+.tm-cartouche span { font-style: italic; font-size: 0.92rem; }
+.tm:not(.is-world) .tm-cartouche { left: 12px; transform: none; padding: 0.3rem 0.8rem; }
+.tm:not(.is-world) .tm-cartouche span { display: none; }
+.tm.is-phone .tm-cartouche { padding: 0.25rem 0.7rem; }
+.tm.is-phone .tm-cartouche span { display: none; }
+
+.tm-fog {
+  position: absolute; inset: 0; z-index: 4; display: grid; place-items: center;
+  background: radial-gradient(ellipse at 50% 45%, rgba(var(--m-fog), 0.95) 0 36%, rgba(var(--m-fog), 0.8) 62%, rgba(var(--m-fog), 0.55) 100%);
+  color: var(--m-fogtext);
+}
+.tm-fog[hidden] { display: none; }
+.tm-fog-card { display: grid; gap: 0.65rem; justify-items: center; text-align: center; max-width: 34ch; padding: 1rem 1.25rem; }
+.tm-fog-title { font-family: var(--font-display); font-weight: 500; font-size: var(--step-3); line-height: 1.15; }
+.tm-fog-text { font-size: 1.02rem; line-height: 1.45; }
+.tm-wipe { position: absolute; inset: 0; z-index: 8; display: none; pointer-events: none; }
+
+/* ---------- Panel: a side scroll on a wide plate, a bottom sheet on a phone ---------- */
+.tm-panel {
+  position: absolute; z-index: 6; top: 12px; right: 12px; bottom: 12px; width: min(360px, 42%);
+  display: flex; flex-direction: column;
+  background: var(--surface); color: var(--ink); border: 2px solid var(--ink); box-shadow: 5px 5px 0 var(--shade);
+  transform: translateX(calc(100% + 28px)); opacity: 0; visibility: hidden;
+  transition: transform 0.4s cubic-bezier(.3, .9, .3, 1), opacity 0.3s ease, visibility 0s 0.4s;
+}
+.tm-panel.is-open { transform: none; opacity: 1; visibility: visible; transition-delay: 0s; }
+.tm-panel-body { flex: 1; overflow-y: auto; overscroll-behavior: contain; padding: 1.1rem 1.1rem 0; }
+.tm-close {
+  position: absolute; top: 8px; right: 8px; z-index: 2; width: 34px; height: 34px; display: grid; place-items: center; padding: 0;
+  background: var(--surface); color: var(--ink); border: 2px solid var(--ink); cursor: pointer;
+}
+.tm-close:hover { background: var(--bg); }
+.tm-close svg { width: 16px; height: 16px; }
+.tm-eyebrow { display: flex; align-items: center; gap: 0.45rem; padding-right: 2.6rem; font-family: var(--font-label); font-weight: 700; font-size: 0.9rem; letter-spacing: 0.1em; text-transform: lowercase; color: var(--gold); }
+.tm-eyedot { flex: none; width: 13px; height: 13px; border-radius: 50%; background: var(--pin); border: 1.5px solid var(--ink); }
+.tm-title { margin: 0.35rem 0 0.3rem; font-family: var(--font-display); font-weight: 500; font-size: 1.45rem; line-height: 1.15; letter-spacing: 0.01em; }
+.tm-title:focus { outline: none; }
+.tm-meta { color: var(--ink-soft); font-size: 1rem; line-height: 1.4; }
+.tm-meta b { color: var(--ink); }
+.tm-claim { margin: 0.7rem 0 0.2rem; padding: 0.15rem 0.6rem; font-size: 0.86rem; line-height: 1.35; background: var(--bg); border-left: 4px solid var(--c, var(--verdigris)); }
+.tm-claim[data-claim="record"] { --c: var(--verdigris); }
+.tm-claim[data-claim="tradition"] { --c: var(--gold-bright); }
+.tm-claim[data-claim="debate"] { --c: var(--storm); }
+.tm-text { margin: 0.65rem 0 1rem; font-size: 1rem; line-height: 1.5; }
+.tm-videos { display: grid; gap: 0.9rem; }
+.tm-video { display: grid; grid-template-columns: 124px minmax(0, 1fr); gap: 0.8rem; align-items: start; position: relative; }
+.tm-thumb { position: relative; display: block; overflow: hidden; aspect-ratio: 16 / 9; background: var(--ink); border: 2px solid var(--ink); box-shadow: 3px 3px 0 var(--shade); }
+.tm-thumb img { width: 100%; height: 100%; object-fit: cover; }
+.tm-dur { position: absolute; right: 0.4rem; bottom: 0.4rem; padding: 0 0.4rem; background: var(--ink); color: var(--on-ink); font-weight: 700; font-size: 0.8rem; font-variant-numeric: tabular-nums; }
+.tm-label { font-family: var(--font-label); font-weight: 700; font-size: 0.85rem; letter-spacing: 0.08em; text-transform: lowercase; color: var(--gold); }
+.tm-video h4 { margin: 0.1rem 0 0.5rem; font-size: 0.98rem; line-height: 1.25; font-weight: 700; text-wrap: balance; }
+.tm-video h4 a { color: var(--ink); text-decoration: none; }
+.tm-video h4 a:hover { text-decoration: underline; }
+.tm-shorts { margin-top: 1.2rem; }
+.tm-sub { font-family: var(--font-label); font-weight: 700; font-size: 0.85rem; letter-spacing: 0.1em; text-transform: lowercase; color: var(--gold); margin-bottom: 0.3rem; }
+.tm-shorts ul { margin: 0; padding: 0; list-style: none; display: grid; gap: 0.3rem; }
+.tm-shorts li { font-size: 0.97rem; line-height: 1.35; padding-left: 0.9rem; position: relative; }
+.tm-shorts li::before { content: ""; position: absolute; left: 0; top: 0.5em; width: 5px; height: 5px; background: var(--gold-bright); transform: rotate(45deg); }
+.tm-nav {
+  position: sticky; bottom: 0; display: flex; align-items: center; justify-content: space-between; gap: 0.5rem;
+  margin: 1.2rem -1.1rem 0; padding: 0.65rem 1.1rem; background: var(--surface); border-top: 1.5px solid var(--line);
+}
+.tm-nav .btn[disabled] { opacity: 0.4; cursor: default; transform: none; box-shadow: 2px 2px 0 var(--shade); }
+.tm-pos { font-family: var(--font-label); font-weight: 700; font-size: 0.9rem; letter-spacing: 0.04em; color: var(--ink-soft); }
+
+.tm.is-phone .tm-panel {
+  position: fixed; z-index: 70; left: 0; right: 0; top: auto; bottom: 0; width: min(100%, 680px); margin-inline: auto; max-height: 58vh; max-height: 58svh;
+  border-width: 2px 0 0; box-shadow: 0 -5px 0 var(--shade); padding-bottom: env(safe-area-inset-bottom, 0px);
+  transform: translateY(calc(100% + 12px));
+}
+.tm.is-phone .tm-panel.is-open { transform: none; }
+
+/* ---------- Era bar (inside the plate) and region chips (below it) ---------- */
+.tm-ages { display: flex; overflow-x: auto; scrollbar-width: none; background: var(--surface); border-top: 2px solid var(--ink); }
+.tm-ages::-webkit-scrollbar { display: none; }
+.tm-age {
+  flex: 1 1 0; min-width: max-content; display: flex; align-items: center; gap: 0.55rem; padding: 0.55rem 0.85rem;
+  background: transparent; color: var(--ink); border: 0; border-right: 1.5px solid var(--line);
+  font: inherit; text-align: left; cursor: pointer; transition: background 0.15s ease, color 0.15s ease;
+}
+.tm-age:last-child { border-right: 0; }
+.tm-age:hover { background: var(--bg); }
+.tm-age[aria-checked="true"] { background: var(--ink); color: var(--on-ink); }
+.tm-age:focus-visible { outline-offset: -4px; }
+.tm-age-dot {
+  flex: none; width: 27px; height: 27px; display: grid; place-items: center; border-radius: 50%;
+  background: var(--pin); color: var(--pin-ink); border: 2px solid #1f2430;
+}
+.tm-age[aria-checked="true"] .tm-age-dot { box-shadow: 0 0 0 2px var(--on-ink); }
+.tm-age-dot svg { width: 15px; height: 15px; }
+.tm-age-text { display: grid; min-width: 0; line-height: 1.15; }
+.tm-age-name { font-family: var(--font-label); font-weight: 700; font-size: 0.98rem; letter-spacing: 0.03em; white-space: nowrap; }
+.tm-age-range { font-size: 0.78rem; opacity: 0.75; white-space: nowrap; }
+.tm-age .count { margin-left: auto; padding-left: 0.2rem; font-weight: 700; font-size: 0.85rem; opacity: 0.8; font-variant-numeric: tabular-nums; }
+.tm-age.is-empty[aria-checked="false"] { opacity: 0.55; }
+.tm.is-phone .tm-age { flex: none; padding: 0.5rem 0.7rem; }
+.tm.is-phone .tm-age-range { display: none; }
+
+.tm-regions { display: flex; flex-wrap: wrap; align-items: center; gap: 0.5rem 1rem; }
+.tm-regions[hidden] { display: none; }
+.tm-regions-label { font-family: var(--font-label); font-weight: 700; font-size: var(--step--1); letter-spacing: 0.12em; text-transform: lowercase; color: var(--gold); }
+.tm-regions .chips { margin-bottom: 0; }
+.tm-regions .chip.is-empty { opacity: 0.6; }
+@media (max-width: 560px) { .tm-regions { gap: 0.4rem; } .tm-regions .chips { width: 100%; } }
+
+/* ---------- Motion (everything below is switched off by prefers-reduced-motion) ---------- */
+@media (prefers-reduced-motion: no-preference) {
+  .tm-waves { animation: tm-waves 7s linear infinite; }
+  .starfield i { animation: tm-twinkle 3.6s ease-in-out infinite; animation-delay: var(--d, 0s); }
+  .tm-pin.is-current .tm-medal { animation: tm-pulse 1.7s ease-in-out infinite; }
+}
+/* Moved with transform, not mask-position: the compositor shifts a finished layer, so the idle map costs no repaint. The layer is 68px wider on the left, one tile more than it travels. */
+@keyframes tm-waves { from { transform: translate3d(0, 0, 0); } to { transform: translate3d(34px, 0, 0); } }
+@keyframes tm-twinkle { 0%, 100% { opacity: 0.25; transform: scale(0.7); } 50% { opacity: 1; transform: scale(1.25); } }
+@keyframes tm-pulse { 0%, 100% { box-shadow: 0 0 0 2.5px rgba(246, 239, 220, 0.9), 3px 3px 0 2.5px rgba(0, 0, 0, 0.3), 0 0 0 5px rgba(246, 239, 220, 0.5); } 50% { box-shadow: 0 0 0 2.5px rgba(246, 239, 220, 0.9), 3px 3px 0 2.5px rgba(0, 0, 0, 0.3), 0 0 0 12px rgba(246, 239, 220, 0); } }
+.tm-pin.is-current .tm-medal { transform: scale(1.18); }
+
+/* ---------- Phone refinements (come last so they win over the base rules above) ---------- */
+.tm.is-phone .tm-hud { left: auto; right: 8px; top: 8px; gap: 0.35rem; }
+.tm.is-phone .tm-found { font-size: 0.85rem; padding: 0.08rem 0.5rem; }
+.tm.is-phone .tm-random { padding: 0.3rem 0.45rem; }
+.tm.is-phone .tm-random-label { display: none; }
+.tm.is-phone .tm-cartouche { left: 8px; bottom: 8px; transform: none; padding: 0.22rem 0.65rem; }
+.tm.is-phone .tm-cartouche b { font-size: 0.8rem; letter-spacing: 0.06em; white-space: nowrap; }
+.tm.is-phone .tm-pin .tm-tag { display: none; }
+.tm.is-phone[data-era="classical"] .tm-hud { top: 30px; }
+.tm.is-phone[data-era="classical"] .tm-cartouche { bottom: 30px; }
+.tm.is-phone .wind { width: 40px; }
+.tm.is-phone .moon, .tm.is-phone .sun { width: 36px; right: 22%; }
+.tm.is-phone .cn-modern .rose { width: 56px; height: 56px; right: 8px; bottom: 8px; }
+.tm.is-phone .tm-medal { width: 30px; height: 30px; margin: -15px 0 0 -15px; }
+.tm.is-phone .tm-seal-btn .tm-medal { width: 38px; height: 38px; margin: -19px 0 0 -19px; }
+.tm.is-phone .tm-medal svg { width: 18px; height: 18px; }
+
+.tm-video .btn { white-space: nowrap; padding: 0.32rem 0.7rem; font-size: 0.9rem; }
