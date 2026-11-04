@@ -59,6 +59,10 @@ prekriva.
   umesto `year`. `circa: true` piše „c.”; `when` zamenjuje ceo ispis datuma. Samo kad priča nema
   jedan datum a poznato je njeno doba, `era` ga zadaje izričito (Polinezija je za sada tako).
 - `region` je jedna od `REGIONS` (nova regija = jedan unos sa `fit` okvirom i pozicijom pečata).
+- Video koji je gotov a nije objavljen: u `EPISODES` ključ `"soon-<slug>"` i `soon: true`, bez linka;
+  sajt piše „Coming soon to YouTube”. Kad izađe, ključ se zameni pravim ID-jem u `EPISODES` i
+  `EVENTS`, a `soon` se briše.
+- Panel je uvek desno, a region se na širokom ekranu kadrira u slobodni deo levo od njega.
 - Jedan video može imati više pinova (Antikitera ima olupinu i otkriće), a jedan pin više videa.
 - `claim` se odnosi na tekst pina, ne na ceo video.
 - Brojači, pečati regija i čipovi se ažuriraju sami.

@@ -328,13 +328,21 @@
     function sizeNow() { return { w: stage.clientWidth, h: stage.clientHeight }; }
     // Below this the plate switches to the phone layout: a 3:2 stage and a bottom sheet.
     function isPhone() { return stage.clientWidth < 860; }
+    // Width the side panel takes on a wide plate. None on the world view (tales open from a region)
+    // and on a phone or tablet, where the panel is a bottom sheet.
+    function panelReserve() {
+      return (state.region === "world" || isPhone()) ? 0 : panel.offsetWidth + 20;
+    }
     function targetFrame() {
       var s = sizeNow();
-      // The panel lies over the map and never moves the camera (see panelSide).
       var box = state.region === "world" ? WORLD_BOX : RG[state.region].box;
       var air = state.region === "world" ? 1.02 : 1.2;
-      var k = Math.max((box.x1 - box.x0) * air / s.w, (box.y1 - box.y0) * air / s.h);
-      return { cx: (box.x0 + box.x1) / 2, cy: (box.y0 + box.y1) / 2, w: s.w * k };
+      // The tale panel is always on the right. A region is framed in the free part to its left from
+      // the start, so opening the panel never covers a pin and never moves the camera.
+      var padR = panelReserve();
+      var freeW = s.w - padR;
+      var k = Math.max((box.x1 - box.x0) * air / freeW, (box.y1 - box.y0) * air / s.h);
+      return { cx: (box.x0 + box.x1) / 2 + (padR / 2) * k, cy: (box.y0 + box.y1) / 2, w: s.w * k };
     }
     // While the camera flies, the halo and the graticule (the costliest layers to redraw) are left
     // out in CSS; they fade back in when it lands. The coast itself is never swapped for a cruder one.
@@ -409,7 +417,7 @@
         it.x = Math.max(24, Math.min(s.w - 24, it.x)); it.y = Math.max(24, Math.min(s.h - 24, it.y));
         it.el.style.transform = "translate3d(" + it.x.toFixed(1) + "px," + it.y.toFixed(1) + "px,0)";
         // A pin's name opens to the right, or to the left when the pin is near the free edge.
-        if (it.kind === "tale") it.el.classList.toggle("tag-left", it.x > s.w * 0.55);
+        if (it.kind === "tale") it.el.classList.toggle("tag-left", it.x > s.w - panelReserve() - 210);
         var far = Math.hypot(it.x - it.ax, it.y - it.ay) > 8;
         it.leader.line.style.display = it.leader.dot.style.display = far ? "" : "none";
         if (far) {
@@ -538,6 +546,13 @@
     // ------------------------------------------------------------------ panel
     function videoHTML(id) {
       var v = D.EPISODES[id], url = YT + "watch?v=" + id;
+      if (v.soon) {
+        // Finished but not published yet: nothing to link to.
+        return '<article class="tm-video is-soon">' +
+          '<span class="tm-thumb"><img src="img/thumbs/' + v.thumb + '.jpg" alt="" width="960" height="540" loading="lazy"><span class="tm-dur">' + v.dur + "</span></span>" +
+          '<div class="tm-video-body"><p class="tm-label">' + esc(v.label) + "</p><h4>" + esc(v.title) + "</h4>" +
+            '<span class="tm-soon">Coming soon to YouTube</span></div></article>';
+      }
       return '<article class="tm-video">' +
         '<a class="tm-thumb" href="' + url + '" target="_blank" rel="noopener" tabindex="-1" aria-hidden="true">' +
           '<img src="img/thumbs/' + v.thumb + '.jpg" alt="" width="960" height="540" loading="lazy"><span class="tm-dur">' + v.dur + "</span></a>" +
@@ -563,19 +578,11 @@
           '<button type="button" class="btn btn-line btn-small" data-act="next"' + (i >= list.length - 1 ? " disabled" : "") + ">Later →</button>" +
         "</nav>";
     }
-    // The panel lies over the map, on the side away from the pin, so opening it moves nothing and
-    // never covers the tale it is about. (On a phone it is a bottom sheet, below the stage.)
-    function panelSide() {
-      if (isPhone()) return "r";
-      var s = sizeNow(), t = targetFrame(), ev = EV[state.tale];
-      return (ev.mx - (t.cx - t.w / 2)) / t.w * s.w > s.w / 2 ? "l" : "r";
-    }
+    // The panel lies over the right-hand part of the map, which targetFrame() leaves free, so opening
+    // it moves nothing. (On a phone or tablet it is a bottom sheet, below the stage.)
     function renderPanel() {
       var open = !!state.tale;
       if (open) {
-        var side = panelSide(), was = panel.classList.contains("is-open");
-        panel.classList.toggle("side-l", side === "l");
-        if (!was) void panel.offsetWidth; // let the side settle before it slides in
         panel.classList.add("is-open");
         // Rebuild when the tale or the filter changes the "n of m" line.
         var key = state.tale + "|" + state.era;

@@ -5,27 +5,34 @@
 
   // ---------------------------------------------------------------------------
   // Data. IDs, titles, lengths and playlist membership were checked against
-  // YouTube on 2026-10-29. Adding an episode is one entry here.
+  // YouTube on 2026-11-04. Adding an episode is one entry here.
+  //
+  // An episode that is finished but not yet published has `soon: true` and no real YouTube ID: use
+  // a key such as "soon-<slug>". The site then shows "Coming soon" instead of a link. When it goes
+  // up, replace the key with the real ID everywhere (EPISODES, EVENTS) and drop `soon`.
   // ---------------------------------------------------------------------------
   var EPISODES = {
     "_eKElXW9Hk4": { thumb: "antikythera", dur: "4:06", label: "Greece · the wreck of 1900",
       title: "Divers Found a 2,000-Year-Old Greek Computer in a Shipwreck",
       hook: "Sponge divers raise a lump of bronze. Inside it are gears that tracked the Sun and Moon and predicted eclipses." },
     "aE1EFPZLo3E": { thumb: "greek-gods-1", dur: "4:03", label: "Greek Gods · Part 1",
-      title: "Zeus, Poseidon and Hades Drew Lots for the Universe",
+      title: "Zeus, Poseidon and Hades Drew Lots for the Universe (Greek Gods, Part 1)",
       hook: "Three brothers divide the sky, the sea and the underworld. The place to start the series." },
     "MZ5I5s2hapA": { thumb: "tyr-and-fenrir", dur: "3:31", label: "Norse myth",
       title: "The God Who Sacrificed His Hand to Save the World",
       hook: "The gods bind the wolf Fenrir with a ribbon made of six impossible things. Týr pays the price." },
     "DBGWroAot-4": { thumb: "harem-conspiracy", dur: "4:35", label: "Egypt · c. 1155 BC",
-      title: "The Harem Conspiracy That Killed Ramesses III",
-      hook: "A plot against the pharaoh from inside his own palace, known from the trial records." },
+      title: "Unknown Man E: The Mummy Linked to a Pharaoh's Murder",
+      hook: "A plot against the pharaoh from inside his own palace, and a nameless mummy in a goatskin that may be linked to it." },
     "NHMGOOVNNk0": { thumb: "heavenly-horses", dur: "4:42", label: "Han China · 104–102 BC",
       title: "A Kingdom Refused to Sell Its Horses. So China Sent an Army",
       hook: "Dayuan would not sell its horses. The emperor would not let his beaten army back through the Jade Gate." },
     "nUQkW9Umv8M": { thumb: "marathon", dur: "5:08", label: "Greece · 490 BC",
       title: "The Battle of Marathon: The Battle Won by a Dead Man's Army",
       hook: "Athens against the Persian landing at Marathon, told from an unexpected angle." },
+    "tCUBTJ4WTFU": { thumb: "greek-gods-3", dur: "4:50", label: "Greek Gods · Part 3",
+      title: "The Greek Gods Born Against All Odds - Athena, Apollo & Artemis",
+      hook: "Hera hunted Leto across the world, and Athena came out of Zeus's head. Three gods who were never supposed to be born." },
     "asH-WNx94kA": { thumb: "greek-gods-2", dur: "4:41", label: "Greek Gods · Part 2",
       title: "Marriage, Harvest or Hearth: Which Goddess Held the Real Power?",
       hook: "Hera, Demeter and Hestia got no kingdom of their own. Each found a different kind of power." },
@@ -37,7 +44,10 @@
       hook: "Polynesian navigators found islands by reading the stars, the swells, the birds and the clouds." },
     "hsGI3xlJ-SY": { thumb: "croesus", dur: "3:09", label: "Lydia · 546 BC",
       title: "The Last Lydian King: The Prophecy That Destroyed His Kingdom",
-      hook: "Croesus asks Delphi whether to attack Persia. The answer is true, and it ruins him." }
+      hook: "Croesus asks Delphi whether to attack Persia. The answer is true, and it ruins him." },
+    "soon-substitute-king": { soon: true, thumb: "substitute-king", dur: "4:17", label: "Assyria · 671 BC",
+      title: "The Substitute King",
+      hook: "When an eclipse threatened the king of Assyria, his scholars put another man on the throne to die in his place." }
   };
 
   var SHORTS = {
@@ -50,15 +60,17 @@
     "2vnd3hiaP2U": "The Plot Against Ramesses III",
     "hAbpc4Q_14Q": "He Sent an Army to War. Then Refused to Let Them Home",
     "u9WZwX3Iktw": "One of China's Biggest Military Problems Wasn't Weapons, but Horses",
-    "Ci5iIipPjEk": "Divers Thought the Seabed Was Covered in Bodies"
+    "Ci5iIipPjEk": "Divers Thought the Seabed Was Covered in Bodies",
+    "Pk5ssjyOLN8": "Zeus Heard His Father's Prophecy and Swallowed His Wife",
+    "HqpnbC-z_VU": "Apollo Was Born on Delos. Centuries Later, Nobody Else Could Be"
   };
 
   var FEATURED = ["_eKElXW9Hk4", "aE1EFPZLo3E", "MZ5I5s2hapA", "DBGWroAot-4", "NHMGOOVNNk0", "nUQkW9Umv8M"];
 
   var PLAYLISTS = [
     { id: "PLCYDtXyl-EcU", chip: "Greek Mythology", name: "Greek Mythology", emblem: "bolt",
-      blurb: "The Greek Gods series in order, from the lottery for the universe to the three sisters.",
-      videos: ["aE1EFPZLo3E", "asH-WNx94kA"], shorts: ["ya6UUlhU648", "cU085EwoFs8", "IGr4Zwxyetk", "VIWp3jvBtwo"] },
+      blurb: "The Greek Gods series in order: the lottery for the universe, the three sisters, and the gods born against the odds.",
+      videos: ["aE1EFPZLo3E", "asH-WNx94kA", "tCUBTJ4WTFU"], shorts: ["ya6UUlhU648", "cU085EwoFs8", "IGr4Zwxyetk", "VIWp3jvBtwo", "Pk5ssjyOLN8", "HqpnbC-z_VU"] },
     { id: "PLfVGPcCCcFU8", chip: "Norse Mythology", name: "Norse Mythology", emblem: "wolf",
       blurb: "Gods, giants and the wolf who could only be held by a ribbon.",
       videos: ["MZ5I5s2hapA"], shorts: ["BSsP9n2tbSc"] },
@@ -134,7 +146,7 @@
   var REGIONS = [
     { id: "greece",    name: "Greece & the Aegean",  chip: "Greece",           fit: [19.2, 34.4, 28.0, 41.6],   seal: [22.6, 38.9] },
     { id: "italy",     name: "Italy",                chip: "Italy",            fit: [6.5, 36.3, 19.0, 47.3],    seal: [12.6, 42.8] },
-    { id: "near-east", name: "Egypt & the Near East", chip: "Egypt & Near East", short: "Near East", fit: [23.0, 21.5, 41.5, 41.5], seal: [34.5, 30.6] },
+    { id: "near-east", name: "Egypt & the Near East", chip: "Egypt & Near East", short: "Near East", fit: [23.0, 21.5, 48.5, 41.5], seal: [34.5, 30.6] },
     { id: "north",     name: "The North",            chip: "The North",        fit: [2.0, 55.5, 19.0, 67.5],    seal: [9.5, 62.0] },
     { id: "asia",      name: "Central & East Asia",  chip: "Asia",             fit: [44.0, 10.0, 126.0, 52.0],  seal: [72.0, 41.0] },
     { id: "pacific",   name: "The Pacific",          chip: "Pacific",          fit: [164.0, -33.0, -133.0, -1.0], seal: [-166.0, -15.0] }
@@ -143,8 +155,8 @@
   var EVENTS = [
     { id: "greek-gods", name: "Greek Gods", place: "Mount Olympus, in Greek myth",
       lat: 40.09, lon: 22.36, myth: true, region: "greece", claim: "tradition",
-      text: "Three brothers draw lots for the sky, the sea and the underworld, and their sisters are left with marriage, the harvest and the hearth. The series follows the Olympian family one generation at a time.",
-      videos: ["aE1EFPZLo3E", "asH-WNx94kA"], shorts: ["ya6UUlhU648", "cU085EwoFs8", "IGr4Zwxyetk", "VIWp3jvBtwo"] },
+      text: "Three brothers draw lots for the sky, the sea and the underworld, their sisters are left with marriage, the harvest and the hearth, and the next generation, Athena, Apollo and Artemis, is born against the odds. The series follows the Olympian family one generation at a time.",
+      videos: ["aE1EFPZLo3E", "asH-WNx94kA", "tCUBTJ4WTFU"], shorts: ["ya6UUlhU648", "cU085EwoFs8", "IGr4Zwxyetk", "VIWp3jvBtwo", "Pk5ssjyOLN8", "HqpnbC-z_VU"] },
 
     { id: "tyr-and-fenrir", name: "Týr and Fenrir", place: "Scandinavia, in Norse myth",
       lat: 61.6, lon: 8.3, myth: true, region: "north", claim: "tradition",
@@ -153,7 +165,7 @@
 
     { id: "medinet-habu", name: "The harem conspiracy", place: "Thebes (Medinet Habu), Egypt",
       lat: 25.72, lon: 32.6, year: -1155, circa: true, region: "near-east", claim: "record",
-      text: "A plot against the pharaoh grew inside his own palace around 1155 BC. We know it from the trial records on papyrus, which name the accused.",
+      text: "A plot against the pharaoh grew inside his own palace around 1155 BC. We know it from the trial records on papyrus, which name the accused. In a hidden tomb lay a nameless young man in a goatskin, catalogued as Unknown Man E.",
       videos: ["DBGWroAot-4"], shorts: ["2vnd3hiaP2U"] },
 
     // Polynesia has no single place or date in the video, so none is claimed. The pin sits at the
@@ -186,7 +198,12 @@
     { id: "antikythera", name: "The Antikythera mechanism", place: "Off the island of Antikythera, Greece",
       lat: 35.88, lon: 23.31, year: -146, when: "Built c. 205 to 87 BC", region: "greece", claim: "record",
       text: "In 1900 sponge divers sheltering from a storm found an ancient shipwreck off Antikythera. Two years later a lump of corroded bronze split open and the archaeologist Valerios Stais saw a gear wheel. The mechanism tracked the Sun and the Moon and predicted eclipses.",
-      videos: ["_eKElXW9Hk4"], shorts: ["Ci5iIipPjEk"] }
+      videos: ["_eKElXW9Hk4"], shorts: ["Ci5iIipPjEk"] },
+
+    { id: "substitute-king", name: "The Substitute King", place: "Nineveh, Assyria (modern Iraq)",
+      lat: 36.36, lon: 43.15, year: -671, region: "near-east", claim: "record",
+      text: "When the moon went dark, the scholars of Esarhaddon, king of Assyria, had a way to save his life: put another man on the throne and let the omen fall on him. Hundreds of their letters survive, and in 671 BC the stand-in was Damqi, the son of a high temple official in Akkad.",
+      videos: ["soon-substitute-king"], shorts: [] }
   ];
 
   // The three kinds of claim, worded as in the "How it's made" section.

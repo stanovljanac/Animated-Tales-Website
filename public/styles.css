@@ -731,9 +731,7 @@ a.series-item:hover { transform: translateX(4px); box-shadow: -4px 0 0 var(--gol
   transition: transform 0.4s cubic-bezier(.3, .9, .3, 1), opacity 0.3s ease, visibility 0s 0.4s;
 }
 .tm-panel.is-open { transform: none; opacity: 1; visibility: visible; transition-delay: 0s; }
-/* map.js puts the panel on the side away from the pin, so it never covers it and never moves the map. */
-.tm-panel.side-l { right: auto; left: 12px; transform: translateX(calc(-100% - 28px)); }
-.tm-panel.side-l.is-open { transform: none; }
+/* The panel is always on the right; map.js frames each region in the free part to its left. */
 .tm-panel-body { flex: 1; overflow-y: auto; overscroll-behavior: contain; padding: 1.1rem 1.1rem 0; }
 .tm-close {
   position: absolute; top: 8px; right: 8px; z-index: 2; width: 34px; height: 34px; display: grid; place-items: center; padding: 0;
@@ -873,7 +871,12 @@ a.series-item:hover { transform: translateX(4px); box-shadow: -4px 0 0 var(--gol
 @media (prefers-reduced-motion: no-preference) {
   .tm-cover.is-hint { animation: tm-peek 5.2s cubic-bezier(.45, .05, .25, 1) 1.2s infinite; }
   .tm-cover.is-hint .tm-cover-tab svg { animation: tm-nudge 5.2s ease-in-out 1.2s infinite; }
-  .tm-cover.is-hint:hover { animation: none; transform: translateY(-9%); transition: transform 0.25s ease; }
+}
+/* On hover the banner lifts as far as it does in the hint (28%), and stays there, so the map under
+   it is visible and it is clear the banner can be pulled up. Hover-capable devices only: on a
+   touch screen a tap opens the map, and a stuck hover state would leave the banner half raised. */
+@media (hover: hover) and (prefers-reduced-motion: no-preference) {
+  .tm-cover.is-hint:hover { animation: none; transform: translateY(-28%); transition: transform 0.3s cubic-bezier(.3, .7, .3, 1); }
 }
 @keyframes tm-peek {
   0%, 56%, 100% { transform: translateY(0); }
@@ -905,3 +908,10 @@ a.series-item:hover { transform: translateX(4px); box-shadow: -4px 0 0 var(--gol
 .tm.is-phone .tm-seal-btn .tm-medal { width: 32px; height: 32px; margin: -16px 0 0 -16px; }
 .tm.is-phone .tm-count { font-size: 1rem; }
 .tm.is-phone .tm-grid { display: none; }
+
+/* A video that is finished but not yet published: same card, no link. */
+.tm-video.is-soon .tm-thumb { filter: saturate(0.85); }
+.tm-soon {
+  display: inline-block; padding: 0.3rem 0.7rem; border: 2px dashed var(--ink); color: var(--ink);
+  font-family: var(--font-label); font-weight: 700; font-size: 0.9rem; letter-spacing: 0.05em; white-space: nowrap;
+}
