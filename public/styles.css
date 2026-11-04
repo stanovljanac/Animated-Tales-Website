@@ -872,12 +872,6 @@ a.series-item:hover { transform: translateX(4px); box-shadow: -4px 0 0 var(--gol
   .tm-cover.is-hint { animation: tm-peek 5.2s cubic-bezier(.45, .05, .25, 1) 1.2s infinite; }
   .tm-cover.is-hint .tm-cover-tab svg { animation: tm-nudge 5.2s ease-in-out 1.2s infinite; }
 }
-/* On hover the banner lifts as far as it does in the hint (28%), and stays there, so the map under
-   it is visible and it is clear the banner can be pulled up. Hover-capable devices only: on a
-   touch screen a tap opens the map, and a stuck hover state would leave the banner half raised. */
-@media (hover: hover) and (prefers-reduced-motion: no-preference) {
-  .tm-cover.is-hint:hover { animation: none; transform: translateY(-28%); transition: transform 0.3s cubic-bezier(.3, .7, .3, 1); }
-}
 @keyframes tm-peek {
   0%, 56%, 100% { transform: translateY(0); }
   67% { transform: translateY(-28%); }
