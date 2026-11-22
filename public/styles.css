@@ -219,9 +219,9 @@ p { margin: 0; }
 
 .realms {
   list-style: none; margin: 1.25rem 0 0; padding: 0;
-  display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 1.75rem 1rem;
+  display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 1.75rem 1rem;
 }
-.realms li { display: grid; justify-items: center; text-align: center; gap: 0.35rem; }
+.realms li { display: grid; justify-items: center; align-content: start; text-align: center; gap: 0.35rem; }
 .realms b { font-family: var(--font-display); font-weight: 700; font-size: 1.05rem; letter-spacing: 0.03em; }
 .realms small { color: var(--ink-soft); font-size: 0.98rem; line-height: 1.3; }
 .medal {
@@ -319,11 +319,11 @@ p { margin: 0; }
 .pl-shorts { list-style: none; margin: 0; padding: 0.6rem 0 0; border-top: 1px dashed var(--line); display: grid; gap: 0.35rem; font-size: 1rem; }
 .pl-shorts li::before { content: "▸ "; color: var(--gold); }
 @media (min-width: 1001px) {
-  .pl-plate[data-n="1"] { grid-column: span 2; }
+  .pl-plate[data-n="1"], .pl-plate[data-n="4"] { grid-column: span 2; }
   .pl-plate[data-n="3"] { grid-column: 1 / -1; }
 }
 @media (min-width: 621px) and (max-width: 1000px) {
-  .pl-plate[data-n="2"], .pl-plate[data-n="3"] { grid-column: 1 / -1; }
+  .pl-plate[data-n="2"], .pl-plate[data-n="3"], .pl-plate[data-n="4"] { grid-column: 1 / -1; }
 }
 .more-line { margin-top: 2.25rem; font-family: var(--font-label); font-weight: 700; letter-spacing: 0.04em; }
 

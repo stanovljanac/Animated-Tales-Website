@@ -52,7 +52,7 @@
     var reduce = !!(window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches);
 
     // Label side per region seal, so neighbouring names in the Mediterranean do not collide.
-    var SIDE = { greece: "b", italy: "l", "near-east": "r", north: "t", asia: "b", pacific: "b" };
+    var SIDE = { greece: "b", italy: "l", "near-east": "r", north: "t", asia: "b", pacific: "b", americas: "b" };
 
     // Pin glyphs: one per era, so the era reads without relying on colour alone.
     var GLYPH = {

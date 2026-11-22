@@ -5,7 +5,7 @@
 
   // ---------------------------------------------------------------------------
   // Data. IDs, titles, lengths and playlist membership were checked against
-  // YouTube on 2026-11-04. Adding an episode is one entry here.
+  // YouTube on 2026-11-22. Adding an episode is one entry here.
   //
   // An episode that is finished but not yet published has `soon: true` and no real YouTube ID: use
   // a key such as "soon-<slug>". The site then shows "Coming soon" instead of a link. When it goes
@@ -22,7 +22,7 @@
       title: "The God Who Sacrificed His Hand to Save the World",
       hook: "The gods bind the wolf Fenrir with a ribbon made of six impossible things. Týr pays the price." },
     "DBGWroAot-4": { thumb: "harem-conspiracy", dur: "4:35", label: "Egypt · c. 1155 BC",
-      title: "Unknown Man E: The Mummy Linked to a Pharaoh's Murder",
+      title: "The Harem Conspiracy That Killed Ramesses III",
       hook: "A plot against the pharaoh from inside his own palace, and a nameless mummy in a goatskin that may be linked to it." },
     "NHMGOOVNNk0": { thumb: "heavenly-horses", dur: "4:42", label: "Han China · 104–102 BC",
       title: "A Kingdom Refused to Sell Its Horses. So China Sent an Army",
@@ -45,9 +45,15 @@
     "hsGI3xlJ-SY": { thumb: "croesus", dur: "3:09", label: "Lydia · 546 BC",
       title: "The Last Lydian King: The Prophecy That Destroyed His Kingdom",
       hook: "Croesus asks Delphi whether to attack Persia. The answer is true, and it ruins him." },
-    "soon-substitute-king": { soon: true, thumb: "substitute-king", dur: "4:17", label: "Assyria · 671 BC",
-      title: "The Substitute King",
-      hook: "When an eclipse threatened the king of Assyria, his scholars put another man on the throne to die in his place." }
+    "ovdOrU00qX4": { thumb: "substitute-king", dur: "4:17", label: "Assyria · 671 BC",
+      title: "The Ancient Ritual of Crowning Another Man to Die in the King's Place",
+      hook: "When an eclipse threatened the king of Assyria, his scholars put another man on the throne to die in his place." },
+    "nxcTrVYjtcg": { thumb: "hero-twins", dur: "4:10", label: "Maya myth · the Popol Vuh",
+      title: "Hunahpu and Xbalanque Went Down to the Maya Underworld, Where Their Father Died",
+      hook: "The lords of death invite two brothers to a ball game. It is the trap that killed their father, and the brothers know it." },
+    "JQyt0JaRJ8Q": { thumb: "greek-gods-4", dur: "4:18", label: "Greek Gods · Part 4",
+      title: "Hephaestus, Aphrodite & Ares: The Net That Caught the God of War",
+      hook: "Hera threw her lame son off Olympus. He answered with a golden throne, and later with chains too fine for any god to see." }
   };
 
   var SHORTS = {
@@ -62,21 +68,29 @@
     "u9WZwX3Iktw": "One of China's Biggest Military Problems Wasn't Weapons, but Horses",
     "Ci5iIipPjEk": "Divers Thought the Seabed Was Covered in Bodies",
     "Pk5ssjyOLN8": "Zeus Heard His Father's Prophecy and Swallowed His Wife",
-    "HqpnbC-z_VU": "Apollo Was Born on Delos. Centuries Later, Nobody Else Could Be"
+    "HqpnbC-z_VU": "Apollo Was Born on Delos. Centuries Later, Nobody Else Could Be",
+    "jyWoxvOcqgM": "Athena - The Daughter Zeus Gave Birth to Held the Keys to His Thunderbolt",
+    "g2bzPMek2kM": "Apollo Asked Hermes if He Would Take Such Chains for a Night With Aphrodite",
+    "b3Q45EOYVik": "Miltiades Wanted to Fight at Marathon. Others Said Wait for the Spartans",
+    "YJXu48VsENg": "People Say the Ghosts of Warriors Still Fight at Marathon Field After Dark",
+    "3I4feLCRJjg": "Before Attacking Persia, Croesus Tested the Oracles of the Ancient World",
+    "SQWGCcpbR3s": "Croesus Had to Choose Between Waiting for Persia and Striking First",
+    "CEVHoFV1ySs": "Damqi \"Ruled\" Assyria, Babylonia and All the Countries, Then Died in the King's Place",
+    "5n38G3QJn9M": "How the Maya Twins Greeted Every Lord of Death by Name"
   };
 
   var FEATURED = ["_eKElXW9Hk4", "aE1EFPZLo3E", "MZ5I5s2hapA", "DBGWroAot-4", "NHMGOOVNNk0", "nUQkW9Umv8M"];
 
   var PLAYLISTS = [
     { id: "PLCYDtXyl-EcU", chip: "Greek Mythology", name: "Greek Mythology", emblem: "bolt",
-      blurb: "The Greek Gods series in order: the lottery for the universe, the three sisters, and the gods born against the odds.",
-      videos: ["aE1EFPZLo3E", "asH-WNx94kA", "tCUBTJ4WTFU"], shorts: ["ya6UUlhU648", "cU085EwoFs8", "IGr4Zwxyetk", "VIWp3jvBtwo", "Pk5ssjyOLN8", "HqpnbC-z_VU"] },
+      blurb: "The Greek Gods series in order: the lottery for the universe, the three sisters, the gods born against the odds, and the net that caught the god of war.",
+      videos: ["aE1EFPZLo3E", "asH-WNx94kA", "tCUBTJ4WTFU", "JQyt0JaRJ8Q"], shorts: ["ya6UUlhU648", "cU085EwoFs8", "IGr4Zwxyetk", "VIWp3jvBtwo", "Pk5ssjyOLN8", "HqpnbC-z_VU", "jyWoxvOcqgM", "g2bzPMek2kM"] },
     { id: "PLfVGPcCCcFU8", chip: "Norse Mythology", name: "Norse Mythology", emblem: "wolf",
       blurb: "Gods, giants and the wolf who could only be held by a ribbon.",
       videos: ["MZ5I5s2hapA"], shorts: ["BSsP9n2tbSc"] },
     { id: "PLBQAMHoMK26c", chip: "Greek History", name: "Greek History", emblem: "amphora",
       blurb: "Marathon, the oracle at Delphi and a machine pulled out of a shipwreck.",
-      videos: ["_eKElXW9Hk4", "hsGI3xlJ-SY", "nUQkW9Umv8M"], shorts: [] },
+      videos: ["_eKElXW9Hk4", "hsGI3xlJ-SY", "nUQkW9Umv8M"], shorts: ["SQWGCcpbR3s", "3I4feLCRJjg", "YJXu48VsENg", "b3Q45EOYVik"] },
     { id: "PLc1nD6MP3I24", chip: "Rome", name: "Rome History", emblem: "aquila",
       blurb: "The night the Gauls walked into Rome, and how close the city came to ending there.",
       videos: ["_1h_EAjb_wk"], shorts: ["qAfoX8bUg_k"] },
@@ -91,7 +105,19 @@
       videos: ["_eKElXW9Hk4", "Mrai30wItZI"], shorts: ["Ci5iIipPjEk"] },
     { id: "PLJV7xQyHhydw", chip: "Battles", name: "History Battles", emblem: "helmet",
       blurb: "Armies, decisions and what they cost.",
-      videos: ["NHMGOOVNNk0", "nUQkW9Umv8M"], shorts: ["hAbpc4Q_14Q", "u9WZwX3Iktw"] }
+      videos: ["NHMGOOVNNk0", "nUQkW9Umv8M"], shorts: ["hAbpc4Q_14Q", "u9WZwX3Iktw"] },
+    { id: "PLA7y22Sz8NpI", chip: "Americas", name: "Ancient Americas", emblem: "pyramid",
+      blurb: "Myths and histories from the Americas, starting with the Maya hero twins of the Popol Vuh.",
+      videos: ["nxcTrVYjtcg"], shorts: ["5n38G3QJn9M"] },
+    { id: "PLfrKqH2aX25Y", chip: "Underworld", name: "Underworld", emblem: "gate",
+      blurb: "Journeys into the land of the dead, and the people and gods who went down on purpose.",
+      videos: ["nxcTrVYjtcg"], shorts: ["5n38G3QJn9M"] },
+    { id: "PLPmjV6ewoYx0", chip: "Mesopotamia", name: "Ancient Mesopotamia", emblem: "tablet",
+      blurb: "Assyria and Babylon, told from the clay-tablet letters that survive from them.",
+      videos: ["ovdOrU00qX4"], shorts: ["CEVHoFV1ySs"] },
+    { id: "PLEBO7vEBCib8", chip: "Kings", name: "Kings, Crowns & Conspiracies", emblem: "crown",
+      blurb: "Thrones, the people who sat on them, and what it took to keep them alive.",
+      videos: ["ovdOrU00qX4"], shorts: [] }
   ];
 
   // ---------------------------------------------------------------------------
@@ -149,14 +175,15 @@
     { id: "near-east", name: "Egypt & the Near East", chip: "Egypt & Near East", short: "Near East", fit: [23.0, 21.5, 48.5, 41.5], seal: [34.5, 30.6] },
     { id: "north",     name: "The North",            chip: "The North",        fit: [2.0, 55.5, 19.0, 67.5],    seal: [9.5, 62.0] },
     { id: "asia",      name: "Central & East Asia",  chip: "Asia",             fit: [44.0, 10.0, 126.0, 52.0],  seal: [72.0, 41.0] },
-    { id: "pacific",   name: "The Pacific",          chip: "Pacific",          fit: [164.0, -33.0, -133.0, -1.0], seal: [-166.0, -15.0] }
+    { id: "pacific",   name: "The Pacific",          chip: "Pacific",          fit: [164.0, -33.0, -133.0, -1.0], seal: [-166.0, -15.0] },
+    { id: "americas",  name: "The Americas",         chip: "Americas",         fit: [-110.0, 8.0, -72.0, 24.0], seal: [-90.0, 17.0] }
   ];
 
   var EVENTS = [
     { id: "greek-gods", name: "Greek Gods", place: "Mount Olympus, in Greek myth",
       lat: 40.09, lon: 22.36, myth: true, region: "greece", claim: "tradition",
-      text: "Three brothers draw lots for the sky, the sea and the underworld, their sisters are left with marriage, the harvest and the hearth, and the next generation, Athena, Apollo and Artemis, is born against the odds. The series follows the Olympian family one generation at a time.",
-      videos: ["aE1EFPZLo3E", "asH-WNx94kA", "tCUBTJ4WTFU"], shorts: ["ya6UUlhU648", "cU085EwoFs8", "IGr4Zwxyetk", "VIWp3jvBtwo", "Pk5ssjyOLN8", "HqpnbC-z_VU"] },
+      text: "Three brothers draw lots for the sky, the sea and the underworld, their sisters are left with marriage, the harvest and the hearth, the next generation, Athena, Apollo and Artemis, is born against the odds, and Hephaestus catches his wife and the god of war in a net of bronze chains. The series follows the Olympian family one generation at a time.",
+      videos: ["aE1EFPZLo3E", "asH-WNx94kA", "tCUBTJ4WTFU", "JQyt0JaRJ8Q"], shorts: ["ya6UUlhU648", "cU085EwoFs8", "IGr4Zwxyetk", "VIWp3jvBtwo", "Pk5ssjyOLN8", "HqpnbC-z_VU", "jyWoxvOcqgM", "g2bzPMek2kM"] },
 
     { id: "tyr-and-fenrir", name: "Týr and Fenrir", place: "Scandinavia, in Norse myth",
       lat: 61.6, lon: 8.3, myth: true, region: "north", claim: "tradition",
@@ -178,12 +205,12 @@
     { id: "sardis", name: "The fall of Sardis", place: "Sardis, Lydia (modern Turkey)",
       lat: 38.49, lon: 28.04, year: -546, circa: true, region: "near-east", claim: "tradition",
       text: "Croesus, the last king of Lydia, asked the oracle at Delphi whether to attack Persia and was told a great empire would fall. It was his own: Cyrus of Persia took Sardis around 546 BC. The oracle story comes to us from Herodotus.",
-      videos: ["hsGI3xlJ-SY"], shorts: [] },
+      videos: ["hsGI3xlJ-SY"], shorts: ["SQWGCcpbR3s", "3I4feLCRJjg"] },
 
     { id: "marathon", name: "The Battle of Marathon", place: "The plain of Marathon, Greece",
       lat: 38.12, lon: 23.98, year: -490, region: "greece", claim: "record",
       text: "In 490 BC a Persian force landed on the plain of Marathon, and the Athenians marched out to meet it. The episode tells the battle from an unexpected angle.",
-      videos: ["nUQkW9Umv8M"], shorts: [] },
+      videos: ["nUQkW9Umv8M"], shorts: ["b3Q45EOYVik", "YJXu48VsENg"] },
 
     { id: "allia", name: "The Gauls take Rome", place: "Rome and the river Allia, Italy",
       lat: 41.9, lon: 12.5, year: -390, circa: true, region: "italy", claim: "record",
@@ -203,7 +230,14 @@
     { id: "substitute-king", name: "The Substitute King", place: "Nineveh, Assyria (modern Iraq)",
       lat: 36.36, lon: 43.15, year: -671, region: "near-east", claim: "record",
       text: "When the moon went dark, the scholars of Esarhaddon, king of Assyria, had a way to save his life: put another man on the throne and let the omen fall on him. Hundreds of their letters survive, and in 671 BC the stand-in was Damqi, the son of a high temple official in Akkad.",
-      videos: ["soon-substitute-king"], shorts: [] }
+      videos: ["ovdOrU00qX4"], shorts: ["CEVHoFV1ySs"] },
+
+    // The Popol Vuh was written down in the K'iche' highlands of Guatemala, so the pin sits there; Xibalba
+    // itself has no place on a map. Undated: nobody knows how old the story is.
+    { id: "hero-twins", name: "The Maya hero twins", place: "The K'iche' highlands, Guatemala (the Popol Vuh)",
+      lat: 15.03, lon: -91.18, myth: true, region: "americas", claim: "tradition",
+      text: "The lords of Xibalba, the underworld of the K'iche' Maya, invite two brothers to a ball game. It is the trap that killed their father, and the twins know it. The story comes from the Popol Vuh, written down in Guatemala in the 1550s, and scholars still argue about how much of it is older than the Spanish conquest.",
+      videos: ["nxcTrVYjtcg"], shorts: ["5n38G3QJn9M"] }
   ];
 
   // The three kinds of claim, worded as in the "How it's made" section.

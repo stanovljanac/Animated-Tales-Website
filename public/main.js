@@ -222,6 +222,53 @@
       return svg("0 0 100 100",
         both("M4 8H96V92H4Z", "f-ink") + holes +
         frame(8, 0) + frame(37, 1) + frame(66, 2));
+    },
+    pyramid: function () {
+      // A stepped Maya temple pyramid: terraces, a central stair and the shrine on top.
+      var body = "M6 92H94V80H84V68H74V56H64V44H36V56H26V68H16V80H6Z";
+      var treads = "";
+      for (var y = 52; y <= 84; y += 8) treads += "M43 " + y + "H57";
+      return svg("0 0 100 100",
+        both(body, "f-clay") +
+        both("M43 92V44H57V92Z", "f-paper") + '<path class="s thin" d="' + treads + '"/>' +
+        both("M38 44V28H62V44Z", "f-gold") +
+        both("M35 28H65L61 21H39Z", "f-clay") +
+        both("M46 44V34H54V44Z", "f-ink") +
+        '<path class="s thin" d="M26 56H36M64 56H74M16 68H26M74 68H84"/>');
+    },
+    gate: function () {
+      // A doorway into the dark with steps going down and a single flame deep inside: the underworld.
+      return svg("0 0 100 100",
+        both("M12 92V46C12 24 30 8 50 8C70 8 88 24 88 46V92Z", "f-storm") +
+        both("M30 92V54C30 41 38 33 50 33C62 33 70 41 70 54V92Z", "f-ink") +
+        '<path class="s gold-line" d="M33 88H67M38 79H62M43 70H57"/>' +
+        '<g class="flicker">' + both("M50 40C55 46 55 52 50 58C45 52 45 46 50 40Z", "f-gold", "thin") + "</g>" +
+        both("M43 8H57L55 22H45Z", "f-gold"));
+    },
+    tablet: function () {
+      // A clay tablet, slightly tilted, with rows of wedge marks (cuneiform).
+      var wedges = "";
+      for (var r = 0; r < 4; r++) {
+        for (var c = 0; c < 6; c++) {
+          var x = 28 + c * 9, y = 30 + r * 13 - c * 0.9;
+          wedges += "M" + x.toFixed(1) + " " + (y - 3.5).toFixed(1) + "l" + (c % 2 ? 4 : 3) + " 3.5l-" + (c % 2 ? 4 : 3) + " 3.5Z";
+        }
+      }
+      return svg("0 0 100 100",
+        both("M18 20L82 12L88 76L24 86Z", "f-clay") +
+        '<path class="s thin" d="M24 26L77 19M26 80L83 72"/>' +
+        '<path class="s thin" d="' + wedges + '"/>');
+    },
+    crown: function () {
+      var d = "M12 78L8 34L30 54L50 22L70 54L92 34L88 78Z";
+      return svg("0 0 100 100",
+        both(d, "f-gold") +
+        both("M12 78H88V90H12Z", "f-clay") +
+        '<circle class="f-teal" cx="8" cy="34" r="4.5"/><circle class="s" cx="8" cy="34" r="4.5"/>' +
+        '<circle class="f-teal" cx="50" cy="22" r="5"/><circle class="s" cx="50" cy="22" r="5"/>' +
+        '<circle class="f-teal" cx="92" cy="34" r="4.5"/><circle class="s" cx="92" cy="34" r="4.5"/>' +
+        '<circle class="f-paper" cx="30" cy="84" r="2.6"/><circle class="f-paper" cx="50" cy="84" r="2.6"/><circle class="f-paper" cx="70" cy="84" r="2.6"/>' +
+        '<path class="s thin" d="M30 54L36 78M70 54L64 78M50 22V78"/>');
     }
   };
 
@@ -314,7 +361,10 @@
   PLAYLISTS.forEach(function (p) {
     p.shorts.forEach(function (s) { if (!SHORT_TOPIC[s]) SHORT_TOPIC[s] = p; });
   });
-  var shortsOrder = ["VIWp3jvBtwo", "BSsP9n2tbSc", "Ci5iIipPjEk", "2vnd3hiaP2U", "hAbpc4Q_14Q",
+  // Every Short, newest first (publish dates on YouTube); the older ones keep the order they had here.
+  var shortsOrder = ["g2bzPMek2kM", "5n38G3QJn9M", "SQWGCcpbR3s", "CEVHoFV1ySs", "3I4feLCRJjg",
+    "YJXu48VsENg", "jyWoxvOcqgM", "b3Q45EOYVik", "HqpnbC-z_VU", "Pk5ssjyOLN8",
+    "VIWp3jvBtwo", "BSsP9n2tbSc", "Ci5iIipPjEk", "2vnd3hiaP2U", "hAbpc4Q_14Q",
     "cU085EwoFs8", "qAfoX8bUg_k", "IGr4Zwxyetk", "u9WZwX3Iktw", "ya6UUlhU648"];
   document.getElementById("shorts-list").innerHTML = shortsOrder.map(function (id) {
     var p = SHORT_TOPIC[id];

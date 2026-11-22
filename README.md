@@ -21,15 +21,31 @@ ijednom ukine javno deljenje, link na sajtu vodi na stranicu za prijavu.
 Svi podaci žive u `public/data.js` (`window.AT_DATA`): podaci o videima (ID, naslov, trajanje,
 članstvo u plejlistama, Shorts) i podaci mape (`ERAS`, `REGIONS`, `EVENTS`). Nova epizoda = jedan
 unos u `EPISODES`, njen ID u odgovarajućim `PLAYLISTS` i jedan događaj u `EVENTS` (vidi Mapa priča).
-Brojevi u „ledger“ bloku (`index.html`, sekcija About) i Part 3 u sekciji Series pišu se ručno.
-Stanje je provereno prema YouTube-u 29. 10. 2026.
+Brojevi u „ledger“ bloku (`index.html`, sekcija About), medalje „Where the stories come from“ i
+lista delova u sekciji Series (Part 1–4 i najava kompilacije „The 12 Gods“) pišu se ručno.
+Redosled Shortova u sekciji Shorts je u `shortsOrder` na vrhu `main.js` (svi, najnoviji prvi); Short koji
+nije u toj listi se ne vidi na sajtu, iako je u `SHORTS`.
+Stanje je provereno prema YouTube-u 22. 11. 2026. (14 epizoda, 20 Shortova, 12 plejlisti).
+
+**Provera prema YouTube-u** (bez naloga i API ključa): `https://www.youtube.com/feeds/videos.xml?channel_id=UCAd2G0YVuAuTTxGFsaYIsLw`
+daje poslednjih 15 otpremanja (ID, naslov, datum, Shortovi imaju `/shorts/` u linku). Tab-ovi kanala
+(`/videos`, `/playlists`) i stranice plejlisti nose `ytInitialData` u HTML-u (`lockupViewModel` po videu);
+`/shorts` bez prijave vraća prazno, pa se Shortovi čitaju iz plejlisti. Trajanje: `"lengthSeconds"` na
+watch stranici (prikaz na YouTube-u je ponekad za sekundu veći). Naslovi se na YouTube-u povremeno
+vrte (test naslova), pa isti video ima više važećih naslova; sajt koristi `og:title` sa watch stranice.
+
+**Plejliste na sajtu ≠ YouTube u tri slučaja** (22. 11. 2026): sajt Short stavlja u plejlistu kojoj tematski
+pripada, a na YouTube-u su pogrešno razvrstani: `CEVHoFV1ySs` (Damqi, Asirija) je tamo u „Egypt Stories“,
+`b3Q45EOYVik` (Miltiad, Maraton) u „Rome History“, `YJXu48VsENg` (duhovi Marathona) u „Greek Mythology“.
+Plejlista „Ancient Mesopotamia“ se na YouTube-u zove „Anicent Mesopotamia“ (greška u imenu); sajt ima ispravno.
 
 ## Mapa priča
 
 Hero je interaktivna ručno crtana mapa sveta: pin je mesto gde se priča iz videa desila. Ploča
 počinje kao baner kanala; povremeno se podigne 15 do 18% od dna, da se vidi da se povlači, a klik
 ili tap ga povlači nagore i otkriva mapu (link sa `?tale=`, `?era=` ili `?region=` preskače baner).
-Tek tada se pod ploču dodaje red regija i dugme „Random tale”. Svet se
+Tek tada se pod ploču dodaje red regija i dugme „Random tale”. Regije su Greece, Italy, Egypt & Near East,
+The North, Asia, Pacific i The Americas (za sada Maje u Gvatemali; u nju ide svaka priča iz Amerika). Svet se
 vidi kao po jedan pečat po regiji sa brojem priča; klik leti kamerom u regiju, gde je svaka priča
 poseban pin. Traka doba (Myth & Legend, Ancient World, Classical Antiquity, Middle Ages, Modern Era)
 boji pinove i menja izgled mape; pin otvara svitak sa videima, Shorts i oznakom vrste tvrdnje
@@ -72,7 +88,8 @@ prekriva.
 projekcija Natural Earth 1 rotirana na 50°E (Mediteran levo od sredine, ceo Pacifik u komadu na
 desnoj strani), fin detalj samo u Egeju i na ostrvima Pacifika. Okviri regija i zone detalja
 (`ZONES` u generatoru) moraju da se poklapaju: nova regija sa većim okvirom traži i finiju obalu tamo,
-inače se na zumu vide grubi poligoni. Zavisnosti se instaliraju van repoa:
+inače se na zumu vide grubi poligoni (zona `mesoamerica` za regiju The Americas dodata 22. 11. 2026.,
++11 KB). Zavisnosti se instaliraju van repoa:
 
 ```
 mkdir /tmp/geo && cd /tmp/geo && npm init -y
@@ -132,6 +149,9 @@ marathon `thumbnail.png`, sack-of-rome `night-when-rome-almost-fell/thumb.jpg`, 
 `thumb.png`, greek-gods-1 `thumbnail.jpeg`, greek-gods-2 `thumbnail2.jpg`, antikythera
 `thumbnail.png`, polynesian `Thumbnail2.jpeg`, harem-conspiracy `thumb.jpg`, croesus `thumb.png`.
 Za Týr lokalne verzije nema — uzet je `i.ytimg.com/vi/MZ5I5s2hapA/maxresdefault.jpg`.
+
+Thumbnaili za `greek-gods-4`, `hero-twins` i `substitute-king` su `i.ytimg.com/vi/<ID>/maxresdefault.jpg`
+(960x540, isti `scale/crop` kao gore; substitute-king je upoređen sa YouTube-om i poklapa se).
 
 Kadrovi galerije: kronos = `greek-gods-part-1/shot03.mp4` na 8. sekundi, gleipnir =
 `tyr-and-fenrir/part14begin.jpeg`, horse-archer = `heavenly-horses/shot04.jpg`.
