@@ -30,7 +30,11 @@ Stanje je provereno prema YouTube-u 22. 11. 2026. (14 epizoda, 20 Shortova, 12 p
 **Provera prema YouTube-u** (bez naloga i API ključa): `https://www.youtube.com/feeds/videos.xml?channel_id=UCAd2G0YVuAuTTxGFsaYIsLw`
 daje poslednjih 15 otpremanja (ID, naslov, datum, Shortovi imaju `/shorts/` u linku). Tab-ovi kanala
 (`/videos`, `/playlists`) i stranice plejlisti nose `ytInitialData` u HTML-u (`lockupViewModel` po videu);
-`/shorts` bez prijave vraća prazno, pa se Shortovi čitaju iz plejlisti. Trajanje: `"lengthSeconds"` na
+`/shorts` bez prijave vraća prazno. Kompletan spisak svih otpremanja (dugi + Shortovi) daje „uploads“
+plejlista kanala: `https://www.youtube.com/playlist?list=UU` + deo ID-ja kanala posle `UC`
+(`UUAd2G0YVuAuTTxGFsaYIsLw`); `UULF…` su samo dugi, a broj u zaglavlju plejliste je kontrolni zbir.
+Poređenje te liste sa ID-jevima u `data.js` je potpuna provera (22. 11. 2026: 34 = 14 + 20, bez razlike).
+Trajanje: `"lengthSeconds"` na
 watch stranici (prikaz na YouTube-u je ponekad za sekundu veći). Naslovi se na YouTube-u povremeno
 vrte (test naslova), pa isti video ima više važećih naslova; sajt koristi `og:title` sa watch stranice.
 
