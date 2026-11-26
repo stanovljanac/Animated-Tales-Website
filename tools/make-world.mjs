@@ -47,7 +47,8 @@ const ZONES = [
   { box: [18, 33, 30, 42.5], m: 700, name: 'aegean' },
   { box: [160, -40, 180, 6], m: 100, name: 'pacific-west' },
   { box: [-180, -40, -128, 6], m: 100, name: 'pacific-east' },
-  { box: [-110, 5, -72, 28], m: 45, name: 'mesoamerica' },
+  // Americas: od Meksika do ekvatora, da i Kolumbija (El Dorado, 27. 11. 2026) ima finu obalu; bilo [-110, 5, -72, 28].
+  { box: [-112, -4, -58, 28], m: 45, name: 'americas' },
   { box: [-12, 26, 52, 73], m: 45, name: 'europe-near-east' },
   { box: [44, 8, 130, 54], m: 6, name: 'asia' },
 ];

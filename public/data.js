@@ -5,7 +5,7 @@
 
   // ---------------------------------------------------------------------------
   // Data. IDs, titles, lengths and playlist membership were checked against
-  // YouTube on 2026-11-22. Adding an episode is one entry here.
+  // YouTube on 2026-11-27. Adding an episode is one entry here.
   //
   // An episode that is finished but not yet published has `soon: true` and no real YouTube ID: use
   // a key such as "soon-<slug>". The site then shows "Coming soon" instead of a link. When it goes
@@ -53,7 +53,10 @@
       hook: "The lords of death invite two brothers to a ball game. It is the trap that killed their father, and the brothers know it." },
     "JQyt0JaRJ8Q": { thumb: "greek-gods-4", dur: "4:18", label: "Greek Gods · Part 4",
       title: "Hephaestus, Aphrodite & Ares: The Net That Caught the God of War",
-      hook: "Hera threw her lame son off Olympus. He answered with a golden throne, and later with chains too fine for any god to see." }
+      hook: "Hera threw her lame son off Olympus. He answered with a golden throne, and later with chains too fine for any god to see." },
+    "e5QGFphahok": { thumb: "el-dorado", dur: "4:06", label: "Colombia · the Muisca",
+      title: "From a Gilded Heir on a Raft to a Lost City on European Maps: The Story of El Dorado",
+      hook: "Before it was a lost city on European maps, El Dorado was a man: a Muisca heir dusted with gold who threw gold into Lake Guatavita from a reed raft." }
   };
 
   var SHORTS = {
@@ -71,6 +74,7 @@
     "HqpnbC-z_VU": "Apollo Was Born on Delos. Centuries Later, Nobody Else Could Be",
     "jyWoxvOcqgM": "Athena - The Daughter Zeus Gave Birth to Held the Keys to His Thunderbolt",
     "g2bzPMek2kM": "Apollo Asked Hermes if He Would Take Such Chains for a Night With Aphrodite",
+    "pXAqkOXhptQ": "Helios Saw Aphrodite With Ares and Went Straight to Her Husband",
     "b3Q45EOYVik": "Miltiades Wanted to Fight at Marathon. Others Said Wait for the Spartans",
     "YJXu48VsENg": "People Say the Ghosts of Warriors Still Fight at Marathon Field After Dark",
     "3I4feLCRJjg": "Before Attacking Persia, Croesus Tested the Oracles of the Ancient World",
@@ -84,7 +88,7 @@
   var PLAYLISTS = [
     { id: "PLCYDtXyl-EcU", chip: "Greek Mythology", name: "Greek Mythology", emblem: "bolt",
       blurb: "The Greek Gods series in order: the lottery for the universe, the three sisters, the gods born against the odds, and the net that caught the god of war.",
-      videos: ["aE1EFPZLo3E", "asH-WNx94kA", "tCUBTJ4WTFU", "JQyt0JaRJ8Q"], shorts: ["ya6UUlhU648", "cU085EwoFs8", "IGr4Zwxyetk", "VIWp3jvBtwo", "Pk5ssjyOLN8", "HqpnbC-z_VU", "jyWoxvOcqgM", "g2bzPMek2kM"] },
+      videos: ["aE1EFPZLo3E", "asH-WNx94kA", "tCUBTJ4WTFU", "JQyt0JaRJ8Q"], shorts: ["ya6UUlhU648", "cU085EwoFs8", "IGr4Zwxyetk", "VIWp3jvBtwo", "Pk5ssjyOLN8", "HqpnbC-z_VU", "jyWoxvOcqgM", "g2bzPMek2kM", "pXAqkOXhptQ"] },
     { id: "PLfVGPcCCcFU8", chip: "Norse Mythology", name: "Norse Mythology", emblem: "wolf",
       blurb: "Gods, giants and the wolf who could only be held by a ribbon.",
       videos: ["MZ5I5s2hapA"], shorts: ["BSsP9n2tbSc"] },
@@ -102,13 +106,13 @@
       videos: ["NHMGOOVNNk0"], shorts: ["hAbpc4Q_14Q", "u9WZwX3Iktw"] },
     { id: "PLCJ0-2X4_lHM", chip: "Mysteries", name: "Ancient Mysteries & Discoveries", emblem: "compass",
       blurb: "Things that look impossible for their time, and what is actually known about them.",
-      videos: ["_eKElXW9Hk4", "Mrai30wItZI"], shorts: ["Ci5iIipPjEk"] },
+      videos: ["_eKElXW9Hk4", "Mrai30wItZI", "e5QGFphahok"], shorts: ["Ci5iIipPjEk"] },
     { id: "PLJV7xQyHhydw", chip: "Battles", name: "History Battles", emblem: "helmet",
       blurb: "Armies, decisions and what they cost.",
       videos: ["NHMGOOVNNk0", "nUQkW9Umv8M"], shorts: ["hAbpc4Q_14Q", "u9WZwX3Iktw"] },
     { id: "PLA7y22Sz8NpI", chip: "Americas", name: "Ancient Americas", emblem: "pyramid",
-      blurb: "Myths and histories from the Americas, starting with the Maya hero twins of the Popol Vuh.",
-      videos: ["nxcTrVYjtcg"], shorts: ["5n38G3QJn9M"] },
+      blurb: "Myths and histories from the Americas: the Maya hero twins of the Popol Vuh, and the gilded man of Lake Guatavita who became El Dorado.",
+      videos: ["nxcTrVYjtcg", "e5QGFphahok"], shorts: ["5n38G3QJn9M"] },
     { id: "PLfrKqH2aX25Y", chip: "Underworld", name: "Underworld", emblem: "gate",
       blurb: "Journeys into the land of the dead, and the people and gods who went down on purpose.",
       videos: ["nxcTrVYjtcg"], shorts: ["5n38G3QJn9M"] },
@@ -176,14 +180,14 @@
     { id: "north",     name: "The North",            chip: "The North",        fit: [2.0, 55.5, 19.0, 67.5],    seal: [9.5, 62.0] },
     { id: "asia",      name: "Central & East Asia",  chip: "Asia",             fit: [44.0, 10.0, 126.0, 52.0],  seal: [72.0, 41.0] },
     { id: "pacific",   name: "The Pacific",          chip: "Pacific",          fit: [164.0, -33.0, -133.0, -1.0], seal: [-166.0, -15.0] },
-    { id: "americas",  name: "The Americas",         chip: "Americas",         fit: [-110.0, 8.0, -72.0, 24.0], seal: [-90.0, 17.0] }
+    { id: "americas",  name: "The Americas",         chip: "Americas",         fit: [-108.0, 2.0, -62.0, 23.0], seal: [-90.0, 17.0] }
   ];
 
   var EVENTS = [
     { id: "greek-gods", name: "Greek Gods", place: "Mount Olympus, in Greek myth",
       lat: 40.09, lon: 22.36, myth: true, region: "greece", claim: "tradition",
       text: "Three brothers draw lots for the sky, the sea and the underworld, their sisters are left with marriage, the harvest and the hearth, the next generation, Athena, Apollo and Artemis, is born against the odds, and Hephaestus catches his wife and the god of war in a net of bronze chains. The series follows the Olympian family one generation at a time.",
-      videos: ["aE1EFPZLo3E", "asH-WNx94kA", "tCUBTJ4WTFU", "JQyt0JaRJ8Q"], shorts: ["ya6UUlhU648", "cU085EwoFs8", "IGr4Zwxyetk", "VIWp3jvBtwo", "Pk5ssjyOLN8", "HqpnbC-z_VU", "jyWoxvOcqgM", "g2bzPMek2kM"] },
+      videos: ["aE1EFPZLo3E", "asH-WNx94kA", "tCUBTJ4WTFU", "JQyt0JaRJ8Q"], shorts: ["ya6UUlhU648", "cU085EwoFs8", "IGr4Zwxyetk", "VIWp3jvBtwo", "Pk5ssjyOLN8", "HqpnbC-z_VU", "jyWoxvOcqgM", "g2bzPMek2kM", "pXAqkOXhptQ"] },
 
     { id: "tyr-and-fenrir", name: "Týr and Fenrir", place: "Scandinavia, in Norse myth",
       lat: 61.6, lon: 8.3, myth: true, region: "north", claim: "tradition",
@@ -237,7 +241,14 @@
     { id: "hero-twins", name: "The Maya hero twins", place: "The K'iche' highlands, Guatemala (the Popol Vuh)",
       lat: 15.03, lon: -91.18, myth: true, region: "americas", claim: "tradition",
       text: "The lords of Xibalba, the underworld of the K'iche' Maya, invite two brothers to a ball game. It is the trap that killed their father, and the twins know it. The story comes from the Popol Vuh, written down in Guatemala in the 1550s, and scholars still argue about how much of it is older than the Spanish conquest.",
-      videos: ["nxcTrVYjtcg"], shorts: ["5n38G3QJn9M"] }
+      videos: ["nxcTrVYjtcg"], shorts: ["5n38G3QJn9M"] },
+
+    // Lake Guatavita, where Freyle sets the ceremony. The ceremony itself has no date and Freyle wrote it
+    // down in 1636, so the year is the Spanish arrival in the Muisca highlands (Quesada, March 1537).
+    { id: "el-dorado", name: "El Dorado", place: "Lake Guatavita, Colombia (the Muisca highlands)",
+      lat: 4.98, lon: -73.78, year: 1537, region: "americas", claim: "debate",
+      text: "The chronicler Juan Rodríguez Freyle, writing in 1636, tells of a Muisca heir dusted with gold who threw gold and emeralds into Lake Guatavita from a reed raft. The Spaniards who reached these highlands in 1537 never saw the ceremony, and historians still argue whether it happened as told. The name El Dorado moved on to a lost city on European maps.",
+      videos: ["e5QGFphahok"], shorts: [] }
   ];
 
   // The three kinds of claim, worded as in the "How it's made" section.
