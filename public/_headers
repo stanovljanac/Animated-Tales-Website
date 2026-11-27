@@ -1,0 +1,6 @@
+# Cloudflare Pages: headers by host and path.
+# The pages.dev address serves the same site as animatedtales.mihailobuilds.com. Keep it out of search
+# results so the custom domain is the only copy that gets indexed (the canonical tag says the same).
+# Preview deployments (<hash>.animated-tales-website.pages.dev) are noindex by default on Pages.
+https://animated-tales-website.pages.dev/*
+  X-Robots-Tag: noindex

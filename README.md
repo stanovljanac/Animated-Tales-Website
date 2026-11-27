@@ -7,10 +7,15 @@ Nastao je od claude.ai artifacta <https://claude.ai/artifact/KQN1oEWsnZbue8ahJUB
 izvor istine je ovaj repo, artifact se više ne ažurira.
 
 ```
-public/         sve što se objavljuje (index.html, styles.css, data.js, main.js, map.js, map-world.js, img/, media/, robots.txt, sitemap.xml)
-tools/          jednokratni alat koji pravi geometriju mape (make-world.mjs); ne objavljuje se
+public/         sve što se objavljuje (index.html, styles.css, data.js, main.js, map.js, map-world.js, img/, media/,
+                robots.txt, _headers, 404.html, sitemap.xml, episodes/<slug>/, IndexNow ključ <32 hex>.txt)
+tools/          alati koji se ne objavljuju: make-world.mjs (geometrija mape), make-pages.mjs (stranice epizoda,
+                sitemap, 404), youtube-meta.mjs (snimak YouTube podataka u youtube.json), indexnow.mjs
 wrangler.jsonc  Cloudflare Pages objavljuje public/ kao statičan sajt, bez instalacije i builda
 ```
+
+`public/episodes/`, `public/404.html`, `public/sitemap.xml` i delovi `index.html` između oznaka
+`<!-- gen:… -->` su generisani (`tools/make-pages.mjs`) i ne menjaju se rukom.
 
 U footeru su dva claude.ai artifacta, oba podeljena javno („anyone with the link“): Episode guide
 <https://claude.ai/artifact/LVzUMeZakKPLHX2GDDSMkg> i artifact verzija ovog sajta (gore). Ako se
@@ -26,6 +31,17 @@ lista delova u sekciji Series (Part 1–4 i najava kompilacije „The 12 Gods“
 Redosled Shortova u sekciji Shorts je u `shortsOrder` na vrhu `main.js` (svi, najnoviji prvi); Short koji
 nije u toj listi se ne vidi na sajtu, iako je u `SHORTS`.
 Stanje je provereno prema YouTube-u 27. 11. 2026. (15 epizoda, 21 Short, 12 plejlisti).
+
+**Posle svake izmene `data.js`** (nova epizoda, promenjen naslov, nova plejlista):
+
+```
+node tools/youtube-meta.mjs <ID>    # samo za novi video: datum objave, trajanje i opis u tools/youtube.json
+node tools/make-pages.mjs           # stranica epizode, spisak na početnoj, sitemap, 404
+node tools/make-pages.mjs --check   # pre commita: exit 1 ako je ijedan generisan fajl zastareo
+```
+
+Bez `youtube.json` unosa za novi video generator staje sa porukom koju komandu da pustiš. Posle
+pusha na `main`: `node tools/indexnow.mjs` (vidi Pretraživači).
 
 **Provera prema YouTube-u** (bez naloga i API ključa): `https://www.youtube.com/feeds/videos.xml?channel_id=UCAd2G0YVuAuTTxGFsaYIsLw`
 daje poslednjih 15 otpremanja (ID, naslov, datum, Shortovi imaju `/shorts/` u linku). Tab-ovi kanala
@@ -127,6 +143,39 @@ Domen: DNS za `mihailobuilds.com` je na GoDaddy-ju (`domaincontrol.com`). Tamo j
 prima custom domen samo kad je DNS celog domena na Cloudflare-u.
 
 Ako sajt ikad ide na drugi hosting: objavljuje se samo sadržaj `public/`.
+
+## Pretraživači (SEO)
+
+**Polazno stanje (27. 11. 2026).** Za upit „animated tales" se takmiče dve TV serije sa Wikipedijom i
+IMDb-om (*Shakespeare: The Animated Tales*, 1992; *Animated Tales of the World*, 2001) i bar pet YouTube
+kanala koji se zovu tačno „Animated Tales" (`@AnimatedTales-v1d` sa 53,9K pratilaca, `@AnimatedTales-l5u`,
+`@AnimatedTales_123`, `@ScribbleStories-r4n` i naš `@AnimatedTales-r4r`); u YouTube pretrazi kanala naš je
+bio 20. Sajt nije izlazio ni na upit po imenu domena, svaka nepostojeća adresa je vraćala početnu sa 200
+(Pages bez `404.html` radi kao SPA), a `pages.dev` kopija je bila otvorena za indeksiranje.
+
+**Šta sajt sada nudi:**
+
+- početna: `Organization` + `WebSite` (JSON-LD) sa `sameAs` ka kanalu (handle i ID), Facebooku, Instagramu i
+  X-u, i statičan spisak svih epizoda sa linkovima (vidljiv i bez JavaScript-a);
+- `/episodes/<slug>/` po epizodi: naslov „… | Animated Tales", ugrađen video (youtube-nocookie), opis i
+  poglavlja sa YouTube-a (bez hashtagova i „subscribe" rečenica), mesto i vreme iz pina, plejliste,
+  Shortovi, `VideoObject` + `BreadcrumbList`;
+- `404.html` (prava 404 umesto početne), `_headers` (`X-Robots-Tag: noindex` na `pages.dev`),
+  `sitemap.xml` sa svim stranicama, IndexNow ključ.
+
+**Ručni koraci (vlasnik, jednom):**
+
+1. Google Search Console → Add property → **Domain** `mihailobuilds.com` → TXT zapis kod GoDaddy-ja
+   (pokriva i portfolio i sve poddomene). Zatim Sitemaps → `https://animatedtales.mihailobuilds.com/sitemap.xml`
+   i URL Inspection → Request indexing za početnu. Ako je lakše preko meta taga (URL-prefix property),
+   pošalji vrednost `google-site-verification` i ide u `<head>` početne.
+2. Bing Webmaster Tools → Import from Google Search Console (Bing hrani i DuckDuckGo, Yahoo i Ecosia).
+3. Brave nema prijavu sajta: sam nalazi stranice preko linkova, pa mu pomaže isto što i ostalima.
+
+Šta je realno: upit „animated tales" je opšti i zauzet; prvo mesto na Google-u za njega se ne može
+podesiti, već se zarađuje autoritetom (pratioci, gledanost, linkovi ka sajtu). Ono što sajt može odmah
+da osvoji su upiti sa preciznijim rečima („animated tales history", „animated tales greek gods",
+„animated tales mythology") i stranice epizoda za njihove teme.
 
 ## Slike i video
 
